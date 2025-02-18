@@ -2,8 +2,13 @@ import datetime
 from flask import Flask, jsonify, request
 import jwt
 from mongoengine import connect, Document,DateField, StringField, EmailField, IntField,ListField, QuerySetManager, NotUniqueError, ValidationError, DoesNotExist,DateTimeField
+from Controller.admin_controller import Admins
 from Controller.auth_controller import Authentication
+from Controller.hr_controller import  Human_resources
+from Controller.manager_controller import Managers
 from Controller.permission_controller import Permission
+from Controller.user_controller import Users
+from Models.ModelSchemas import Manager
 from Utils.helper import roles_accepted
 from Controller.project_assign_controller import Assign_projects
 from Controller.project_controller import Projects
@@ -47,123 +52,8 @@ def serialize_user(id):
     user_dict["_id"] = str(user_dict["_id"])  # Convert ObjectId to string
     return user_dict
 
-
-class Admin(Document):
-    objects = QuerySetManager()
-    password = StringField(required=True)
-    name =StringField(required=True,unique=True)
-    email = EmailField(required=True)
-    mobile = StringField(required=False)
-
-
-@app.route('/admin', methods=['GET','POST','DELETE'])
-def admin():
-    methods = {
-        'POST': insert_admin,
-        'GET': get_admin,
-        'DELETE': delete_admin,
-    }
-    return methods.get(request.method)()
-        
-
-def insert_admin():
-    data = request.form.to_dict()
-    user = Admin(**data)
-    user.save()
-    return jsonify({"message":"Admin created successfully"})
-
-
-def get_admin():
-    admins = Admin.objects()    
-    admins = [serialize_user(admin) for admin in admins]
- 
-    response_data = {
-            "success": True,
-            "data": admins,
-            "msg": "Success" if admins else "Record not found"
-        }
-    
-    return jsonify(response_data), 200
-
-def update_admin():
-
-    data =request.form.to_dict()
-    admin = Admin.objects(id=data.get('id'))
-    if not admin:
-        return jsonify({"message":"Admin does not exists"}),404
-    data.pop('_id')   
-    admin.update(**data)
-    return {"message": "Data updated successfully."},200
-
-def delete_admin():
-   
-    data = request.get_json()
-    admin = Admin.objects(id=data.get("id"))
-    if not user:
-        return jsonify({"message":"Admin not found"}), 404
-    
-    admin.delete()    
-    return jsonify({"message":"Deleted successfully"}), 200
-  
-class User(Document):
-    objects = QuerySetManager()   
-    password = StringField(required=True)
-    email = EmailField(required=True, unique=True)
-    mobile = StringField(required=True, unique=True)
-    role = StringField(required=True)
-    name = StringField(required=True)
-    dob = DateField(required=True)
-    area = StringField(required=True)
-    state = StringField(required=True)
-    pincode = IntField(required=True)   
-    gender = StringField(required=False)
-    # employee_id = StringField(required=True)
-    report_to = StringField(required=True)
-    created_at = DateTimeField(default=datetime.datetime.now)
-    created_by = StringField(required=True)
-    created_by_name = StringField(required=True)
-    modified_at = DateTimeField(required=False)
-    modified_by = StringField(required=False)
-    modified_by_name = StringField(required=False)    
-    # permissions = ListField(StringField())
-    # newpassword = StringField()
-    # created_at = DateTimeField(default=datetime.now())
-    
-@app.route('/user', methods=['GET','POST','DELETE','PUT'])
-def user():
-    methods = {
-        'POST': insert_user,
-        'GET': get_user,
-        'PUT':update_user,
-        'DELETE':delete_user
-    }
-    return methods.get(request.method)()
-
-
-def insert_user():
-    data =request.form.to_dict()
-    data['created_by'] = '1'
-    data['created_by_name'] = 'test'
-    user = User(**data)
-    user.save()
-    return jsonify({"message":"User created successfully"}),201
-
-
-
-def get_user():
-    users = User.objects()
-    users = [serialize_user(user) for user in users]
-  
-    response_data = {
-            "success": True,
-            "data": users,
-            "msg": "Success" if users else "Record not found"
-        }
-    
-    return jsonify(response_data), 200
-
 @app.route('/permission', methods=['GET', 'POST', 'DELETE', 'PUT'])
-@roles_accepted('Admin', 'User', 'HR', 'Manager')
+@roles_accepted('Admin', 'HR', 'Manager')
 def permission():
     """
     1. Handle all those permissions 
@@ -186,32 +76,6 @@ def login():
     obj = Authentication()
     role = request.args.get("role")
     return obj.authenticate_user(role)
-
-def update_user():
-
-    data =request.form.to_dict()
-    
-    data['modified_at'] = datetime.datetime.now
-    data['modified_by'] = '1'
-    data['modified_by_name'] = 'test'
-    
-    user = User.objects(id=data.get('id'))
-    if not user:
-        return jsonify({"message":"user does not exists"}),404
-    data.pop('id')   
-    user.update(**data)
-    return {"message": "Data updated successfully."},200
-
-def delete_user():
-   
-    data = request.get_json()
-    user = User.objects(id=data.get("id"))
-    if not user:
-        return jsonify({"message":"User not found"}), 404
-
-    user.delete()    
-    return jsonify({"message":"Deleted successfully"}), 200
-
 
 @app.route('/project', methods=['GET', 'POST', 'DELETE', 'PUT'])
 def project():
@@ -248,6 +112,57 @@ def timesheet():
         'POST': obj.insert_timesheet,
         'PUT': obj.update_timesheet,
         'DELETE': obj.delete_timesheet,
+    }
+    return methods.get(request.method)()
+
+@app.route('/user', methods=['GET', 'POST', 'DELETE', 'PUT'])
+def user():
+    
+    obj = Users()
+    methods = {
+        'GET': obj.get_all_user,
+        'POST': obj.insert_user,
+        'PUT': obj.update_user,
+        'DELETE': obj.delete_user,
+    }
+    return methods.get(request.method)()
+
+
+@app.route('/admin', methods=['GET', 'POST', 'DELETE', 'PUT'])
+def admin():
+    
+    obj = Admins()
+    methods = {
+        'GET': obj.get_all_admin,
+        'POST': obj.insert_admin,
+        'PUT': obj.update_admin,
+        'DELETE': obj.delete_admin,
+    }
+    return methods.get(request.method)()
+
+
+@app.route('/hr', methods=['GET', 'POST', 'DELETE', 'PUT'])
+def human_resource():
+    
+    obj = Human_resources()
+    methods = {
+        'GET': obj.get_all_hr,
+        'POST': obj.insert_hr,
+        'PUT': obj.update_hr,
+        'DELETE': obj.delete_hr,
+    }
+    return methods.get(request.method)()
+
+
+@app.route('/manager', methods=['GET', 'POST', 'DELETE', 'PUT'])
+def manager():
+    
+    obj = Managers()
+    methods = {
+        'GET': obj.get_all_manager,
+        'POST': obj.insert_manager,
+        'PUT': obj.update_manager,
+        'DELETE': obj.delete_manager,
     }
     return methods.get(request.method)()
 

@@ -1,5 +1,6 @@
 from flask import jsonify, request
 
+from Models.ModelSchemas import User
 from Utils.helper import JWTHandler
 
 
@@ -12,15 +13,18 @@ class Authentication:
         if role not in possible_roles:
             return jsonify({"mesage": "Invalid role"}), 400
         data = request.get_json()
+        
         username = data.get("username")
         password = data.get("password")
-        server_side_data = {
-            "username": "admin",
-            "password": "admin"
-        }
+        user = User.objects(email = username).first()
+               
+        if not user:
+            return jsonify({"message":"User does not exists"})
+        
         # import pdb; pdb.set_trace()
-        if username != server_side_data["username"] or password != server_side_data["password"]:
-            return jsonify({"mesage": "Invalid credentials"}), 400
+        if  password != user["password"]:
+            return jsonify({"mesage": "Password mismatch"}), 400
+        
         payload = {
             "role": role,
             "username": username
