@@ -1,6 +1,7 @@
 from flask import Flask, jsonify, request
 from mongoengine import connect, Document,DateField, StringField, EmailField, IntField,ListField, QuerySetManager, NotUniqueError, ValidationError, DoesNotExist
-from bson import ObjectId
+from Controller.permission_controller import Permission
+
 
 app = Flask(__name__)
 
@@ -139,6 +140,24 @@ def get_user():
         }
     
     return jsonify(response_data), 200
+
+@app.route('/permission', methods=['GET', 'POST', 'DELETE', 'PUT'])
+def permission():
+    """
+    1. Handle all those permissions 
+    2. insert - User those who requested permission
+    3. GET - Fetch all permission requests who is responsible
+    4. DELETE - Optional 
+    """
+    obj = Permission()
+    methods = {
+        'GET': obj.get_permission_requested_list,
+        'POST': obj.request_permission,
+        'PUT': obj.update_permission,
+        'DELETE': obj.delete_permission,
+    }
+    return methods.get(request.method)()
+
 
 
 def delete_user():
