@@ -1,6 +1,7 @@
 from flask import Flask, jsonify, request
 from mongoengine import connect, Document,DateField, StringField, EmailField, IntField,ListField, QuerySetManager, NotUniqueError, ValidationError, DoesNotExist
 from Controller.permission_controller import Permission
+from Controller.project_controller import Projects
 
 
 app = Flask(__name__)
@@ -208,22 +209,19 @@ class User(Document):
     # newpassword = StringField()
     # created_at = DateTimeField(default=datetime.now())
 
+
+@app.route('/project', methods=['GET', 'POST', 'DELETE', 'PUT'])
+def project():
+    
+    obj = Projects()
+    methods = {
+        'GET': obj.get_all_project,
+        'POST': obj.insert_project,
+        'PUT': obj.update_project,
+        'DELETE': obj.delete_project,
+    }
+    return methods.get(request.method)()
+
 if __name__ == '__main__':
     app.run(debug=True)
 
-
-
-# DEPRECATED:
-# res = serialize_single_user(users)
-# "data": [serialize_user(user) for user in users]
-
-
-
-# def serialize_single_user(user):
-#     return {
-#         "_id": str(user.id),  # Convert ObjectId to string
-#         "username": user.username,
-#         "email": user.email,
-#         "role": user.role,
-#         "permissions": user.permissions
-#     } if user else None
