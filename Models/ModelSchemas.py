@@ -1,5 +1,5 @@
 import datetime
-from mongoengine import connect, Document, StringField, EmailField, ListField, QuerySetManager, NotUniqueError, ValidationError, DoesNotExist,DateTimeField,DateField
+from mongoengine import connect, Document, StringField, EmailField, ListField, QuerySetManager, NotUniqueError, ValidationError, DoesNotExist,DateTimeField,DateField,IntField
 import configparser
 
 # Read the config.ini file
@@ -28,29 +28,28 @@ class Project(Document):
     objects = QuerySetManager()
     project_name = StringField(required=True)
     department = StringField(required=True)
-    description = StringField(required=False)
+    description = StringField()
     created_at = DateTimeField(default=datetime.datetime.now)
     created_by = StringField(required=True)
     created_by_name = StringField(required=True)
     modified_at = DateTimeField(required=False)
     modified_by = StringField(required=False)
-    modified_by_name = StringField(required=False)
+
     
-class project_assigned_to(Document):
+class Assign_project(Document):
     objects = QuerySetManager()
     project_id = StringField(required=True)
     project_name = StringField(required=True)
     user_id = StringField(required=True)
     user_name = StringField(required=True)
     responsible = StringField(required=True)    
-    created_at = DateTimeField(required=True,default=datetime.datetime.now)
-    created_by = StringField(required=True)
-    created_by_name = StringField(required=True)
-    modified_at = DateTimeField(required=True,default=datetime.datetime.now)
-    modified_by = StringField(required=True)
-    modified_by_name = StringField(required=True)
+    assigned_at = DateTimeField(default=datetime.datetime.now)
+    assigned_by = StringField(required=True)   
+    modified_at = DateTimeField(required=False)
+    modified_by = StringField(required=False)
+   
 
-class timesheet(Document):
+class Timesheet(Document):
     objects = QuerySetManager()
     project_id = StringField(required=True)
     project_name = StringField(required=True)
@@ -58,9 +57,26 @@ class timesheet(Document):
     date = DateField(required=True)
     from_time = StringField(required=True)
     to_time = StringField(required=True)    
-    created_at = DateTimeField(required=True,default=datetime.datetime.now)
-    created_by = StringField(required=True)
-    created_by_name = StringField(required=True)
-    modified_at = DateTimeField(required=True,default=datetime.datetime.now)
-    modified_by = StringField(required=True)
-    modified_by_name = StringField(required=True)
+    created_at = DateTimeField(default=datetime.datetime.now)
+    user_id = StringField(required=True)
+    user_name = StringField(required=True)
+    modified_at = DateTimeField(required=False)
+
+    
+
+
+
+class User(Document):
+    objects = QuerySetManager()
+   
+    username = StringField(required=True, unique=True)
+    password = StringField(required=True)
+    email = EmailField(required=True, unique=True)
+    mobile = StringField(required=True, unique=True)
+    role = StringField(required=True)
+    name = StringField(required=True)
+    dob = DateField(required=True)
+    area = StringField(required=True)
+    state = StringField(required=True)
+    pincode = IntField(required=True)   
+    gender = StringField(required=False)
