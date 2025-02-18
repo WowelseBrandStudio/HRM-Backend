@@ -1,6 +1,9 @@
 from flask import Flask, jsonify, request
+import jwt
 from mongoengine import connect, Document, StringField, EmailField, ListField, QuerySetManager, NotUniqueError, ValidationError, DoesNotExist
+from Controller.auth_controller import Authentication
 from Controller.permission_controller import Permission
+from Utils.helper import roles_accepted
 
 #testS
 app = Flask(__name__)
@@ -22,6 +25,13 @@ def handle_validation_error(error):
 def handle_not_found_error(error):
     return {"error": str(error)}, 404
 
+@app.errorhandler(jwt.ExpiredSignatureError)
+def handle_signature_error(error):
+    return jsonify({"error": "Token is expired"}), 403
+
+@app.errorhandler(jwt.InvalidTokenError)
+def  handle_invalid_token_error(error):
+    return jsonify({"error": "Invalid token"}), 401
 
 @app.errorhandler(Exception)
 def unknown_exception_err(error):
@@ -83,6 +93,7 @@ def get():
     return jsonify(response_data), 200
 
 @app.route('/permission', methods=['GET', 'POST', 'DELETE', 'PUT'])
+@roles_accepted('Admin', 'User', 'HR', 'Manager')
 def permission():
     """
     1. Handle all those permissions 
@@ -98,6 +109,12 @@ def permission():
         'DELETE': obj.delete_permission,
     }
     return methods.get(request.method)()
+
+@app.route('/login', methods=['POST'])
+def login():
+    obj = Authentication()
+    role = request.args.get("role")
+    return obj.authenticate_user(role)
 
 
 if __name__ == '__main__':
