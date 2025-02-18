@@ -76,6 +76,16 @@ def get_admin():
     
     return jsonify(response_data), 200
 
+def update_admin():
+
+    data =request.form.to_dict()
+    admin = Admin.objects(id=data.get('id'))
+    if not admin:
+        return jsonify({"message":"Admin does not exists"})
+    data.pop('_id')   
+    admin.update(**data)
+    return {"message": "Data updated successfully."}
+
 def delete_admin():
    
     data = request.get_json()
@@ -104,12 +114,12 @@ class User(Document):
     # newpassword = StringField()
     # created_at = DateTimeField(default=datetime.now())
     
-@app.route('/user', methods=['GET','POST','DELETE',])
+@app.route('/user', methods=['GET','POST','DELETE','PUT'])
 def user():
     methods = {
         'POST': insert_user,
         'GET': get_user,
-        # 'PUT':update_user,
+        'PUT':update_user,
         'DELETE':delete_user
     }
     return methods.get(request.method)()
@@ -140,6 +150,15 @@ def get_user():
     
     return jsonify(response_data), 200
 
+def update_user():
+
+    data =request.form.to_dict()
+    user = User.objects(id=data.get('id'))
+    if not user:
+        return jsonify({"message":"user does not exists"})
+    data.pop('id')   
+    user.update(**data)
+    return {"message": "Data updated successfully."}
 
 def delete_user():
    
@@ -151,6 +170,24 @@ def delete_user():
     user.delete()    
     return jsonify({"message":"Deleted successfully"}), 200
 
+
+class User(Document):
+    objects = QuerySetManager()
+   
+    username = StringField(required=True, unique=True)
+    password = StringField(required=True)
+    email = EmailField(required=True, unique=True)
+    mobile = StringField(required=True, unique=True)
+    role = StringField(required=True)
+    name = StringField(required=True)
+    dob = DateField(required=True)
+    area = StringField(required=True)
+    state = StringField(required=True)
+    pincode = IntField(required=True)   
+    gender = StringField(required=False)
+    # permissions = ListField(StringField())
+    # newpassword = StringField()
+    # created_at = DateTimeField(default=datetime.now())
 
 if __name__ == '__main__':
     app.run(debug=True)
