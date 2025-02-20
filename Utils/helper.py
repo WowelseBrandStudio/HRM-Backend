@@ -1,7 +1,7 @@
 import datetime
 from functools import wraps
 
-from flask import jsonify, request
+from flask import g, jsonify, request
 import jwt
 
 
@@ -22,6 +22,7 @@ def roles_accepted(*roles):
             if not decode_data:
                 return jsonify({"error": "Invalid token"}), 403
             user_role = decode_data['role']  #NOTE: Get the role from token
+            g.client_data = decode_data 
             if user_role not in roles:
                 return jsonify({"error": "Unauthorized"}), 403
             return func(*args, **kwargs)
@@ -35,7 +36,7 @@ class JWTHandler:
 
     def generate_jwt(self, payload: dict) -> str:
         expiration_time = datetime.datetime.now(
-        ) + datetime.timedelta(seconds=30)  # Token expires in 1 hour
+        ) + datetime.timedelta(minutes=120)  # Token expires in 1 hour
         payload['exp'] = expiration_time.timestamp()
         token = jwt.encode(payload, self.SECRET_KEY, algorithm="HS256")
         return token

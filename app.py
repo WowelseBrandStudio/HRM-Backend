@@ -4,10 +4,11 @@ import jwt
 from mongoengine import connect, Document,DateField, StringField, EmailField, IntField,ListField, QuerySetManager, NotUniqueError, ValidationError, DoesNotExist,DateTimeField
 from Controller.admin_controller import Admins
 from Controller.auth_controller import Authentication
+from Controller.bonus_tip_controller import Bonus_tip
 from Controller.hr_controller import  Human_resources
 from Controller.manager_controller import Managers
 from Controller.permission_controller import Permission
-from Controller.user_controller import Users
+from Controller.user_controller import Employees
 from Models.ModelSchemas import Manager
 from Utils.helper import roles_accepted
 from Controller.project_assign_controller import Assign_projects
@@ -53,7 +54,6 @@ def serialize_user(id):
     return user_dict
 
 @app.route('/permission', methods=['GET', 'POST', 'DELETE', 'PUT'])
-@roles_accepted('Admin', 'HR', 'Manager')
 def permission():
     """
     1. Handle all those permissions 
@@ -115,15 +115,15 @@ def timesheet():
     }
     return methods.get(request.method)()
 
-@app.route('/user', methods=['GET', 'POST', 'DELETE', 'PUT'])
-def user():
+@app.route('/employee', methods=['GET', 'POST', 'DELETE', 'PUT'])
+def employee():
     
-    obj = Users()
+    obj = Employees()
     methods = {
-        'GET': obj.get_all_user,
-        'POST': obj.insert_user,
-        'PUT': obj.update_user,
-        'DELETE': obj.delete_user,
+        'GET': obj.get_all_employee,
+        'POST': obj.insert_employee,
+        'PUT': obj.update_employee,
+        'DELETE': obj.delete_employee,
     }
     return methods.get(request.method)()
 
@@ -163,6 +163,19 @@ def manager():
         'POST': obj.insert_manager,
         'PUT': obj.update_manager,
         'DELETE': obj.delete_manager,
+    }
+    return methods.get(request.method)()
+
+
+@app.route('/bonus_tip', methods=['GET', 'POST', 'DELETE', 'PUT'])
+def bonus_tip():
+    
+    obj = Bonus_tip()
+    methods = {
+        'GET': obj.get_all_bonus,
+        'POST': obj.insert_bonus,
+        'PUT': obj.update_bonus,
+        'DELETE': obj.delete_bonus,
     }
     return methods.get(request.method)()
 

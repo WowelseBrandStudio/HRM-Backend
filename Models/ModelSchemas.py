@@ -31,9 +31,8 @@ class Project(Document):
     description = StringField()
     created_at = DateTimeField(default=datetime.datetime.now)
     created_by = StringField(required=True)
-    created_by_name = StringField(required=True)
+    created_by_role = StringField(required=True)
     modified_at = DateTimeField()
-    modified_by = StringField()
 
     
 class Assign_project(Document):
@@ -45,9 +44,9 @@ class Assign_project(Document):
     responsible = StringField(required=True)    
     assigned_at = DateTimeField(default=datetime.datetime.now)
     assigned_by = StringField(required=True)   
+    assigned_by_role = StringField(required=True)   
     modified_at = DateTimeField()
-    modified_by = StringField()
-   
+      
 
 class Timesheet(Document):
     objects = QuerySetManager()
@@ -63,7 +62,7 @@ class Timesheet(Document):
     modified_at = DateTimeField()
 
 
-class User(Document):
+class Employee(Document):
     objects = QuerySetManager()   
     password = StringField(required=True)
     email = EmailField(required=True, unique=True)
@@ -74,9 +73,9 @@ class User(Document):
     state = StringField(required=True)
     pincode = IntField(required=True)   
     gender = StringField()
-    # employee_id = StringField(required=True)
-    reporting_hr = StringField(required=True)
-    reporting_manager = StringField(required=True)
+    unique_id = StringField(required=True)
+    responsible_hr = StringField(required=True)
+    responsible_manager = StringField(required=True)
     created_at = DateTimeField(default=datetime.datetime.now)
     created_by = StringField(required=True)
     created_by_role = StringField(required=True)
@@ -94,12 +93,11 @@ class Human_resource(Document):
     state = StringField(required=True)
     pincode = IntField(required=True)   
     gender = StringField()
-    # employee_id = StringField(required=True)
+    unique_id = StringField(required=True)
     created_at = DateTimeField(default=datetime.datetime.now)
     created_by = StringField(required=True)
     created_by_role = StringField(required=True)
     modified_at = DateTimeField()
-
 
 class Manager(Document):
     objects = QuerySetManager()   
@@ -112,7 +110,7 @@ class Manager(Document):
     state = StringField(required=True)
     pincode = IntField(required=True)   
     gender = StringField()
-    # employee_id = StringField(required=True)
+    unique_id = StringField(required=True)
     created_at = DateTimeField(default=datetime.datetime.now)
     created_by = StringField(required=True)
     created_by_role = StringField(required=True)
@@ -124,3 +122,15 @@ class Admin(Document):
     name =StringField(required=True)
     email = EmailField(required=True,unique=True)
     mobile = StringField(required=True,unique=True)
+    user_id = StringField(required=True)
+    created_at = DateTimeField(default=datetime.datetime.now)
+
+
+class Bonus(Document):
+    objects = QuerySetManager()
+    user_id = StringField(required=True)
+    bonus_given_by =StringField(required=True)
+    tip_code = StringField(required=True)
+    description = StringField()
+    created_at = DateTimeField(default=datetime.datetime.now)
+    modified_at = DateTimeField()
