@@ -48,20 +48,17 @@ class Employees:
         user.update(**data)
         return jsonify({"message": "Employee updated successfully"}),200
     
-    @roles_accepted('Admin', 'HR', 'User','Manager')     
+    @roles_accepted('Admin', 'HR', 'User','Manager')
     def get_all_employee(self):
-
-        data = request.args.to_dict()
         client_data=g.client_data
-        if client_data['role'] == 'User':
-            user_id =client_data['user_id']
-        else:            
-            user_id =  data.get('user_id') 
-                
-        filter={
-            'id':user_id
-        } if user_id else {}
-
+        filter = request.args.to_dict()
+        roles = {
+            'Manager': lambda: filter.update({"responsible_manager": client_data['user_id']}),
+            'HR': lambda: filter.update({"responsible_hr": client_data['user_id']}),
+            'User': lambda: filter.update({"user_id": client_data['user_id']})
+            # 'Admin': lambda: filter.update({})
+        }
+        roles.get(client_data['role'], lambda: None)()
         user = Employee.objects(**filter)
         res_data = [serialize_user(record) for record in user]
         return jsonify({"message": "Employee retrevied successfully", "data": res_data}),200
