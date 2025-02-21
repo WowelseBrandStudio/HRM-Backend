@@ -13,21 +13,19 @@ class Managers:
     def insert_manager(self):
 
         data = request.form.to_dict()       
-        possible_gender =['Male','Female','Others']
-
-        if data.get('gender') not in possible_gender:
-            return jsonify({"message":"invalid gender","avaialble_gender":possible_gender})
+        
         client_data = g.client_data
         data['created_by'] = client_data['user_id']
         data['created_by_role'] = client_data['role']
         manager = Manager.objects().order_by('-created_at').first() 
         if manager:
-            unique_id =manager['unique_id']
-            sliced_unique_id = unique_id[8:12] + 1
-            new_unique_id = f'{'WOW-MAN-'}{sliced_unique_id}'
-            data['unique_id'] = new_unique_id
+            unique_id =manager['user_id']
+            sliced_unique_id = unique_id.split('-')[-1]
+            new_number = int(sliced_unique_id)+1
+            new_unique_id = f'{'WOW-MAN-'}{new_number}'
+            data['user_id'] = new_unique_id
         else:
-            data['unique_id'] = 'WOW-MAN-1001'
+            data['user_id'] = 'WOW-MAN-1001'
 
         manager = Manager(**data)
         manager.save()
@@ -38,12 +36,7 @@ class Managers:
   
         data = request.form.to_dict()       
 
-        id = data.get("id")
-        possible_gender =['Male','Female','Others']
-        
-        if data.get('gender') !=  None and data.get('gender') not in possible_gender:
-            return jsonify({"message":"invalid gender","avaialble_gender":possible_gender})
-        
+        id = data.get("id")       
         data['modified_at'] = datetime.datetime.now
 
         manager = Manager.objects(id=id).first()

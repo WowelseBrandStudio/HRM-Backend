@@ -14,22 +14,19 @@ class Employees:
         
         data = request.form.to_dict()  
        
-        possible_gender =['Male','Female','Others']
-
-        if data.get('gender') not in possible_gender:
-            return jsonify({"message":"invalid gender","avaialble_gender":possible_gender})
         client_data = g.client_data
         data['created_by'] = client_data['user_id']
         data['created_by_role'] = client_data['role']
        
         user = Employee.objects().order_by('-created_at').first() 
         if user:
-            unique_id =user['unique_id']
-            sliced_unique_id = unique_id[8:12] + 1
-            new_unique_id = f'{'WOW-EMP-'}{sliced_unique_id}'
-            data['unique_id'] = new_unique_id
+            unique_id =user['user_id']
+            sliced_unique_id = unique_id.split('-')[-1]
+            new_number = int(sliced_unique_id)+1
+            new_unique_id = f'{'WOW-EMP-'}{new_number}'
+            data['user_id'] = new_unique_id
         else:
-            data['unique_id'] = 'WOW-EMP-1001'
+            data['user_id'] = 'WOW-EMP-1001'
 
         user = Employee(**data)
         user.save()
@@ -41,11 +38,6 @@ class Employees:
         data = request.form.to_dict()       
 
         id = data.get("id")
-        possible_gender =['Male','Female','Others']
-     
-        if data.get('gender') !=  None and data.get('gender') not in possible_gender:           
-            return jsonify({"message":"invalid gender","avaialble_gender":possible_gender})
-        
         data['modified_at'] = datetime.datetime.now
 
         user = Employee.objects(id=id).first()
@@ -59,7 +51,18 @@ class Employees:
     @roles_accepted('Admin', 'HR', 'User','Manager')     
     def get_all_employee(self):
 
-        user = Employee.objects()
+        data = request.args.to_dict()
+        client_data=g.client_data
+        if client_data['role'] == 'User':
+            user_id =client_data['user_id']
+        else:            
+            user_id =  data.get('user_id') 
+                
+        filter={
+            'id':user_id
+        } if user_id else {}
+
+        user = Employee.objects(**filter)
         res_data = [serialize_user(record) for record in user]
         return jsonify({"message": "Employee retrevied successfully", "data": res_data}),200
     

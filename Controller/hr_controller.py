@@ -14,22 +14,20 @@ class Human_resources:
     def insert_hr(self):
 
         data = request.form.to_dict()       
-        possible_gender =['Male','Female','Others']
-
-        if data.get('gender') not in possible_gender:
-            return jsonify({"message":"invalid gender","avaialble_gender":possible_gender})
+       
         client_data = g.client_data
         data['created_by'] = client_data['user_id']
         data['created_by_role'] = client_data['role']
         
         hr = Human_resource.objects().order_by('-created_at').first() 
         if hr:
-            unique_id =hr['unique_id']
-            sliced_unique_id = unique_id[9:12] + 1
-            new_unique_id = f'{'WOW-HR-'}{sliced_unique_id}'
-            data['unique_id'] = new_unique_id
+            unique_id =hr['user_id']
+            sliced_unique_id = unique_id.split('-')[-1]
+            new_number = int(sliced_unique_id)+1
+            new_unique_id = f'{'WOW-HR-'}{new_number}'
+            data['user_id'] = new_unique_id
         else:
-            data['unique_id'] = 'WOW-HR-1001'
+            data['user_id'] = 'WOW-HR-1001'
 
         hr = Human_resource(**data)
         hr.save()
@@ -41,11 +39,7 @@ class Human_resources:
         data = request.form.to_dict()       
 
         id = data.get("id")
-        possible_gender =['Male','Female','Others']
-        
-        if data.get('gender') != None and data.get('gender') not in possible_gender:
-            return jsonify({"message":"invalid gender","avaialble_gender":possible_gender})
-        
+       
         data['modified_at'] = datetime.datetime.now
 
         hr = Human_resource.objects(id=id).first()

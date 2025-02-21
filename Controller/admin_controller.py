@@ -17,8 +17,9 @@ class Admins:
         admin = Admin.objects().order_by('-created_at').first()     
         if admin:
             unique_id =admin['user_id']            
-            sliced_unique_id = unique_id[8:12]      
-            new_unique_id = f'{'WOW-ADM-'}{sliced_unique_id}'
+            sliced_unique_id = unique_id.split('-')[-1]
+            new_number = int(sliced_unique_id)+1
+            new_unique_id = f'{'WOW-ADM-'}{new_number}'
             data['user_id'] = new_unique_id
 
         else:
@@ -32,12 +33,12 @@ class Admins:
     def update_admin(self):
   
         data = request.form.to_dict()      
-        id = data.get("id")
+        client_data=g.client_data        
+        id =client_data['user_id']
         admin = Admin.objects(id=id).first()
         if not admin:
             return jsonify({"message":"Admin not found"}), 404
     
-        data.pop('id')  
         admin.update(**data)
         return jsonify({"message": "Admin updated successfully"}),200
     
@@ -54,8 +55,9 @@ class Admins:
     @roles_accepted('Admin')  
     def delete_admin(self):
     
-        data = request.get_json()
-        id = data.get("id")
+        client_data=g.client_data        
+        id =client_data['user_id']
+        
         admin = Admin.objects(id=id).delete()
         if admin == 1:
             return jsonify({"message":"admin Deleted successfully"}), 200
