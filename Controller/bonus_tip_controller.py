@@ -14,8 +14,7 @@ class Bonus_tip:
        
         data = request.get_json()
 
-        bonus = Bonus(**data)
-        bonus.save()
+        bonus = Bonus(**data).save()
         return jsonify({"message":"Bonus created successfully"}),201
     
     @roles_accepted('HR')   
