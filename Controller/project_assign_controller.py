@@ -1,15 +1,15 @@
 
 import datetime
-from flask import jsonify, request
-from Models.ModelSchemas import Project, Assign_project,User
-from Utils.helper import serialize_user
+from flask import g, jsonify, request
+from Models.ModelSchemas import Project, Assign_project,Employee
+from Utils.helper import roles_accepted, serialize_user
 
 
 class Assign_projects:
     def __init__(self):
         pass
 
-    
+    @roles_accepted('Admin', 'HR','Manager')    
     def insert_assign_project(self):
 
         data = request.get_json()  
@@ -18,10 +18,10 @@ class Assign_projects:
         project = Project.objects(id=project_id).first()
 
         user_id = data.get('user_id')
-        user = User.objects(id=user_id).first()
-
-        data['created_by'] = '1'
-        data['created_by_name'] = 'test'
+        user = Employee.objects(id=user_id).first()
+        client_data = g.client_data
+        data['assigned_by'] = client_data['user_id']
+        data['assigned_by_role'] = client_data['role']
         data['project_name'] = project['project_name']
         data['user_name'] = user['name']
         
@@ -30,6 +30,7 @@ class Assign_projects:
 
         return jsonify({"message":"Project assigned successfully"}),201
     
+    @roles_accepted('Admin', 'HR','Manager')
     def update_assign_project(self):
   
         data = request.get_json()
@@ -46,13 +47,11 @@ class Assign_projects:
         if data.get('user_id') != None:
 
             user_id = data.get('user_id')
-            user = User.objects(id=user_id).first()
+            user = Employee.objects(id=user_id).first()
             data['user_name'] = user['name']
 
         data['modified_at'] = datetime.datetime.now
-        data['modified_by'] = '1'
-        data['modified_by_name'] = 'test'
-
+      
         assign_project = Assign_project.objects(id=id).first()
         
         if not assign_project:
@@ -62,7 +61,7 @@ class Assign_projects:
         assign_project.update(**data)
         return jsonify({"message": "Assign Project updated successfully"}),200
     
-        
+    @roles_accepted('Admin', 'HR', 'User','Manager')        
     def get_all_assigned_project(self):
 
         assign_project = Assign_project.objects()
@@ -70,15 +69,13 @@ class Assign_projects:
         res_data = [serialize_user(record) for record in assign_project]
         return jsonify({"message": "Assign Project retrevied successfully", "data": res_data}),200
     
-        
+    @roles_accepted('Admin', 'HR','Manager')    
     def delete_assign_project(self):
     
         data = request.get_json()
         id = data.get("id")
-        assign_project = Assign_project.objects(id=id).first()
-
-        if not assign_project:
-            return jsonify({"message":"Assign Project not found"}), 404
-        
-        assign_project.delete()    
-        return jsonify({"message":"Assigned project Deleted successfully"}), 200
+        assign_project = Assign_project.objects(id=id).delete()
+        if assign_project == 1:
+            return jsonify({"message":"Assign project Deleted successfully"}), 200
+        else:
+            return jsonify({"message":"Assign project not found"}), 404
