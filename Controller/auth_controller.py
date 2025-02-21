@@ -1,7 +1,7 @@
 from flask import jsonify, request
 
 from Models.ModelSchemas import Employee,Manager,Human_resource,Admin
-from Utils.helper import JWTHandler
+from Utils.helper import JWTHandler, create_response
 
 
 class Authentication:
@@ -32,7 +32,8 @@ class Authentication:
         
         # import pdb; pdb.set_trace()
         if  password != user["password"]:
-            return jsonify({"mesage": "Password mismatch"}), 400
+            # return jsonify({"mesage": "Password mismatch"}), 400
+            return create_response(False,"password mmismatch",None,"password mismatch",400)
         
         payload = {
             "role": role,
@@ -41,4 +42,5 @@ class Authentication:
         }
        
         token = JWTHandler().generate_jwt(payload)
-        return jsonify({"token": token}), 200
+        # return jsonify({"token": token}), 200
+        return create_response(True,"login success",token,None,200)

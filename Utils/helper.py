@@ -50,3 +50,15 @@ class JWTHandler:
         #     return {"error": "Token expired"}
         # except jwt.InvalidTokenError:
         #     return {"error": "Invalid token"}
+
+def create_response(success: bool, message: str, data=None, error=None, status_code=200):
+    """
+    Create a consistent response structure for success and failure.
+    """
+    response = {
+        "success": success,   # True | False
+        "message": message,   # Client-side message
+        "data": data if data else {}, # Client-side data
+        "error": error if error else None # Client-side error
+    }
+    return jsonify(response), status_code

@@ -10,7 +10,7 @@ from Controller.manager_controller import Managers
 from Controller.permission_controller import Permission
 from Controller.user_controller import Employees
 from Models.ModelSchemas import Manager
-from Utils.helper import roles_accepted
+from Utils.helper import create_response, roles_accepted
 from Controller.project_assign_controller import Assign_projects
 from Controller.project_controller import Projects
 from Controller.timesheet_controller import Timesheets
@@ -25,27 +25,36 @@ connect(
 
 @app.errorhandler(NotUniqueError)
 def handle_duplicate_error(error):
-    return {"error": str(error)}, 400
+    # return {"error": str(error)}, 400
+    return create_response(False,"data duplication error",None,str(error),400)
 
 @app.errorhandler(ValidationError)
 def handle_validation_error(error):
-    return {"error": str(error)}, 400
+    # return {"error": str(error)}, 400
+
+    return create_response(False,"validation error",None,str(error),400)
 
 @app.errorhandler(DoesNotExist)
 def handle_not_found_error(error):
-    return {"error": str(error)}, 404
+    # return {"error": str(error)}, 
+    return create_response(False,"Data not found",None,str(error),400)
+    
 
 @app.errorhandler(jwt.ExpiredSignatureError)
 def handle_signature_error(error):
-    return jsonify({"error": "Token is expired"}), 403
+    # return jsonify({"error": "Token is expired"}), 403
+    return create_response(False,"Token is expired",None,str(error),403)
 
 @app.errorhandler(jwt.InvalidTokenError)
 def  handle_invalid_token_error(error):
-    return jsonify({"error": "Invalid token"}), 401
+    # return jsonify({"error": "Invalid token"}), 401
+    return create_response(False,"Invalid token",None,str(error),401)
 
 @app.errorhandler(Exception)
 def unknown_exception_err(error):
-    return {"error": str(error)}, 500
+    # return {"error": str(error)}, 500
+    return create_response(False,"Exceptional",None,str(error),401)
+
 
 
 def serialize_user(id):

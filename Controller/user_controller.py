@@ -55,7 +55,7 @@ class Employees:
         roles = {
             'Manager': lambda: filter.update({"responsible_manager": client_data['user_id']}),
             'HR': lambda: filter.update({"responsible_hr": client_data['user_id']}),
-            'User': lambda: filter.update({"user_id": client_data['user_id']})
+            'User': lambda: filter.update({"id": client_data['user_id']})
             # 'Admin': lambda: filter.update({})
         }
         roles.get(client_data['role'], lambda: None)()

@@ -2,7 +2,7 @@
 import datetime
 from flask import g, jsonify, request
 from Models.ModelSchemas import Bonus
-from Utils.helper import roles_accepted, serialize_user
+from Utils.helper import create_response, roles_accepted, serialize_user
 
 
 class Bonus_tip:
@@ -15,7 +15,7 @@ class Bonus_tip:
         data = request.get_json()
 
         bonus = Bonus(**data).save()
-        return jsonify({"message":"Bonus created successfully"}),201
+        return create_response(True,"Bonus created successfully",str(bonus.id),None,201)
     
     @roles_accepted('HR')   
     def update_bonus(self):
