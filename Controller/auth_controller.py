@@ -1,12 +1,24 @@
 from flask import jsonify, request
 
-from Models.ModelSchemas import Employee,Manager,Human_resource,Admin
+from Models.ModelSchemas import HOST, Employee,Manager,Human_resource,Admin
 from Utils.helper import JWTHandler
+from mongoengine import connect, disconnect
 
 
 class Authentication:
-    def __init__(self):
-        pass
+    def __init__(self,app_id):
+        self.app_id = app_id
+        # disconnect('organisation_handler')
+        disconnect('default')
+        self.connect_to_db(self.app_id)
+
+    def connect_to_db(self, db_name):
+        # Dynamically switch the database based on app_id
+        connect(
+            host = HOST,
+            db = db_name,
+        )
+        print(f"Connecting to the database: {self.app_id}")
 
     def authenticate_user(self, role):
         possible_roles = ['Admin', 'User', 'HR', 'Manager']
@@ -37,7 +49,8 @@ class Authentication:
         payload = {
             "role": role,
             "username": username,
-            "user_id":str(user['id'])
+            "user_id":str(user['id']),
+            "app_id":self.app_id
         }
        
         token = JWTHandler().generate_jwt(payload)

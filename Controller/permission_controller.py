@@ -1,14 +1,25 @@
 
 from flask import g, jsonify, request
-from Models.ModelSchemas import permission_request
+from Models.ModelSchemas import HOST, permission_request
 from Utils.helper import roles_accepted, serialize_user
-
+from mongoengine import connect, disconnect
 
 class Permission:
     def __init__(self):
-        pass
+        db_name = g.payload['app_id']
+        disconnect('default')
+        self.connect_to_db(db_name)
+        print("connected to db : ", g.payload['app_id'])
 
-    @roles_accepted('Admin', 'HR', 'User','Manager')    
+    def connect_to_db(self, db_name):
+        # Dynamically switch the database based on app_id
+        connect(
+            host = HOST,
+            db = db_name,
+        )
+
+
+    @roles_accepted('Admin', 'HR', 'User','Manager')
     def get_permission_requested_list(self):
         res_obj = permission_request.objects()
         res_data = [serialize_user(record) for record in res_obj]
@@ -21,7 +32,6 @@ class Permission:
         1. User can request for permission | (insert the information in collection)
         """
         data = request.get_json()
-        print(g.payload)
         res_obj = permission_request(**data)
         res_obj.save()
         return {"message": "Permission request submitted successfully."}
