@@ -2,7 +2,7 @@
 import datetime
 from flask import g, jsonify, request
 from Models.ModelSchemas import Admin
-from Utils.helper import roles_accepted, serialize_user
+from Utils.helper import create_response, roles_accepted, serialize_user
 
 
 class Admins:
@@ -27,7 +27,10 @@ class Admins:
        
         admin = Admin(**data)
         admin.save()
-        return jsonify({"message":"Admin created successfully"}),201
+   
+       
+        return create_response(True,"Admin created successfully",str(admin.id),None,201)
+
     
     @roles_accepted('Admin')
     def update_admin(self):
@@ -37,10 +40,12 @@ class Admins:
         id =client_data['user_id']
         admin = Admin.objects(id=id).first()
         if not admin:
-            return jsonify({"message":"Admin not found"}), 404
+            return create_response(False,"Admin not found",None,None,200)
+
     
         admin.update(**data)
-        return jsonify({"message": "Admin updated successfully"}),200
+        
+        return create_response(True,"Admin updated successfully",str(admin.id),None,200)
     
     @roles_accepted('Admin')    
     def get_all_admin(self):
@@ -50,7 +55,8 @@ class Admins:
         
         admin = Admin.objects(id = user_id)
         res_data = [serialize_user(record) for record in admin]
-        return jsonify({"message": "admin retrevied successfully", "data": res_data}),200
+     
+        return create_response(True,"Admin retrevied successfully",res_data,None,200)
     
     @roles_accepted('Admin')  
     def delete_admin(self):
@@ -60,6 +66,9 @@ class Admins:
         
         admin = Admin.objects(id=id).delete()
         if admin == 1:
-            return jsonify({"message":"admin Deleted successfully"}), 200
+           
+            return create_response(True,"Admin Deleted successfully",None,None,200)
+
         else:
-            return jsonify({"message":"admin not found"}), 404
+          
+            return create_response(True,"Admin not found",None,"Data not found",404)

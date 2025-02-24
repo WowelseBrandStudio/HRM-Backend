@@ -2,7 +2,7 @@
 import datetime
 from flask import g, jsonify, request
 from Models.ModelSchemas import Project,Timesheet, Employee
-from Utils.helper import roles_accepted, serialize_user
+from Utils.helper import create_response, roles_accepted, serialize_user
 
 
 class Timesheets:
@@ -28,7 +28,8 @@ class Timesheets:
         timesheet = Timesheet(**data)
         timesheet.save()
 
-        return jsonify({"message":"Timesheet created successfully"}),201
+        return create_response(True,"Timesheet created successfully",str(timesheet.id),None,200)
+
     
     @roles_accepted('HR', 'User','Manager')
     def update_timesheet(self):
@@ -48,11 +49,13 @@ class Timesheets:
         timesheet = Timesheet.objects(id=id).first()
         
         if not timesheet:
-            return jsonify({"message":"Timesheet not found"}),404
+            return create_response(True,"Timesheet not found",None,None,404)
+
     
         data.pop('id')  
         timesheet.update(**data)
-        return jsonify({"message": "Timesheet updated successfully"}),200
+        return create_response(True,"Timesheet updated successfully",str(timesheet.id),None,200)
+
     
     @roles_accepted('Admin', 'HR', 'User','Manager')
     def get_all_timesheet(self):
@@ -60,7 +63,8 @@ class Timesheets:
         timesheet = Timesheet.objects()
 
         res_data = [serialize_user(record) for record in timesheet]
-        return jsonify({"message": "Timesheet retrevied successfully", "data": res_data}),200
+        return create_response(True,"Timesheet retrevied successfully",res_data,None,200)
+
     
     @roles_accepted('HR', 'User','Manager')
     def delete_timesheet(self):
@@ -70,6 +74,8 @@ class Timesheets:
         timesheet = Timesheet.objects(id=id).delete()
 
         if timesheet == 1:
-            return jsonify({"message":"Timesheet Deleted successfully"}), 200
+            return create_response(True,"Timesheet Deleted successfully",None,None,200)
+
         else:
-            return jsonify({"message":"Timesheet not found"}), 404
+            return create_response(True,"Timesheet not found",None,None,404)
+

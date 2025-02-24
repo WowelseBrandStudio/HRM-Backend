@@ -1,7 +1,7 @@
 
 from flask import g, jsonify, request
 from Models.ModelSchemas import HOST, permission_request
-from Utils.helper import roles_accepted, serialize_user
+from Utils.helper import create_response, roles_accepted, serialize_user
 from mongoengine import connect, disconnect
 
 class Permission:
@@ -23,8 +23,9 @@ class Permission:
     def get_permission_requested_list(self):
         res_obj = permission_request.objects()
         res_data = [serialize_user(record) for record in res_obj]
-      
-        return jsonify({"message": "Permission request", "data": res_data})
+        
+        return create_response(True,"Permission request",res_data,None,200)
+
 
     @roles_accepted('HR', 'User','Manager')
     def request_permission(self):
@@ -34,7 +35,8 @@ class Permission:
         data = request.get_json()
         res_obj = permission_request(**data)
         res_obj.save()
-        return {"message": "Permission request submitted successfully."}
+        return create_response(True,"Permission request submitted",str(res_obj.id),None,201)
+
     
     @roles_accepted('HR', 'User','Manager')
     def update_permission(self):
@@ -46,8 +48,9 @@ class Permission:
         res_obj = permission_request.objects(id=permission_id).first()
         data.pop('_id', None)   # _id cant update
         res_obj.update(**data)
-        return {"message": "Permission request updated successfully."}
-    
+        return create_response(True,"Permission request updated",str(res_obj.id),None,200)
+
+
     @roles_accepted('HR', 'User','Manager')    
     def delete_permission(self):
         """
@@ -58,5 +61,6 @@ class Permission:
         # import pdb; pdb.set_trace()
         res_obj = permission_request.objects(id=permission_id).first()
         res_obj.delete()
-        return {"message": "Permission request deleted successfully."}
+        return create_response(True,"Permission request deleted successfully",None,None,200)
+
     

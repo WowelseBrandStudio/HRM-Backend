@@ -1,7 +1,7 @@
 from flask import request
 
 from Models.ModelSchemas import organization
-from Utils.helper import serialize_user
+from Utils.helper import create_response, serialize_user
 
 
 class Organization:
@@ -22,7 +22,8 @@ class Organization:
         # self.meta = {'collection': collection_name}
         res_obj = organization(**data)
         res_obj.save()
-        return {"message": "Organization added successfully."}
+        return create_response(True,"Organization added successfully",str(res_obj.id),None,201)
+
     
     def update_organization(self):
         """
@@ -31,7 +32,8 @@ class Organization:
         data = request.get_json()
         id = data.get("id")
         res_obj = organization.objects(id=id).update(**data)
-        return {"message": "Organization updated successfully."}
+        return create_response(True,"Organization updated successfully",str(res_obj.id),None,200)
+
     
     def delete_organization(self):
         """
@@ -40,7 +42,8 @@ class Organization:
         data = request.get_json()
         id = data.get("id")
         res_obj = organization.objects(id=id).delete()
-        return {"message": "Organization deleted successfully."}
+        return create_response(True,"Organization deleted successfully",None,None,200)
+
     
     def get_organization_by_id(self):
         """
@@ -49,8 +52,8 @@ class Organization:
         data = request.args.to_dict()
         id = data.get("id")
         res_obj = organization.objects(id=id).first()
-        # res_data = [serialize_user(record) for record in res_obj]
         if not res_obj:
-            return {"message": "Organization not found."}, 404
-        return {"message": "Organization retrieved successfully", "data": res_obj}
+            return create_response(True,"Organization not found",None,None,404)
+        return create_response(True,"Organization retrieved successfully",res_obj,None,200)
+
     
