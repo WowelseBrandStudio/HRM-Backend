@@ -30,7 +30,7 @@ class Bonus_tip:
     
         data.pop('id')  
         bonus.update(**data)
-        return jsonify({"message": "Bonus updated successfully"}),200
+        return create_response(True,"Bonus updated successfully",str(bonus.id),None,200)
     
     @roles_accepted('HR','User')  
     def get_all_bonus(self):
@@ -49,7 +49,8 @@ class Bonus_tip:
         bonus = Bonus.objects(**user_filter)
 
         res_data = [serialize_user(record) for record in bonus]
-        return jsonify({"message": "Bonus retrevied successfully", "data": res_data}),200
+        # return jsonify({"message": "Bonus retrevied successfully", "data": res_data}),200
+        return create_response(True,"Bonus retrevied successfully",res_data,None,200)
     
     @roles_accepted('HR')  
     def delete_bonus(self):
@@ -59,5 +60,6 @@ class Bonus_tip:
         bonus = Bonus.objects(id=id).delete()
         if bonus == 1 :
             return jsonify({"message":"Bonus Deleted successfully"}), 200
+            
         else:
             return jsonify({"message":"Bonus not found"}), 404  
