@@ -1,5 +1,5 @@
 import datetime
-from flask import Flask, jsonify, request
+from flask import Flask, g, jsonify, request
 import jwt
 from mongoengine import connect, Document,DateField, StringField, EmailField, IntField,ListField, QuerySetManager, NotUniqueError, ValidationError, DoesNotExist,DateTimeField
 from Controller.admin_controller import Admins
@@ -7,21 +7,31 @@ from Controller.auth_controller import Authentication
 from Controller.bonus_tip_controller import Bonus_tip
 from Controller.hr_controller import  Human_resources
 from Controller.manager_controller import Managers
+from Controller.organisation_controller import Organization
 from Controller.permission_controller import Permission
 from Controller.user_controller import Employees
 from Models.ModelSchemas import Manager
-from Utils.helper import create_response, roles_accepted
+from Utils.helper import create_response, roles_accepted, set_organisation, validate_token
 from Controller.project_assign_controller import Assign_projects
 from Controller.project_controller import Projects
 from Controller.timesheet_controller import Timesheets
 
+from mongoengine import disconnect
+
 #testS
 app = Flask(__name__)
 
-connect(
-    host = 'mongodb+srv://user:user@wowelse1.c179k.mongodb.net/?retryWrites=true&w=majority&appName=wowelse1',
-    db='company'
-)
+# connect(
+#     host = 'mongodb+srv://user:user@wowelse1.c179k.mongodb.net/?retryWrites=true&w=majority&appName=wowelse1',
+#     db='company'
+# )
+
+# @app.after_request
+# def after_request(response):
+#     # Disconnect from the MongoDB default connection after the request
+#     print("Disconnecting from the database")
+#     disconnect('default')
+#     return response
 
 @app.errorhandler(NotUniqueError)
 def handle_duplicate_error(error):
@@ -62,7 +72,34 @@ def serialize_user(id):
     user_dict["_id"] = str(user_dict["_id"])  # Convert ObjectId to string
     return user_dict
 
+# @app.before_request
+# def before_request():
+#     headers = request.headers
+#     api_key = headers.get("x-api-key")
+#     api_key_secret = headers.get("x-api-secrect")
+#     if api_key is None or api_key_secret is None:
+#         return jsonify({"error": "Headers missing"}), 401
+    
+
+@app.route('/organisation', methods=['GET', 'POST'])
+def organisation():
+    """
+    1. Handle all operations related to organisation
+    2. GET - Fetch details of organisation
+    3. POST - Create new organisation
+    """
+    obj = Organization()
+    methods = {
+        'GET': obj.get_organization_by_id,
+        'POST': obj.insert_organization,
+        'PUT': "update_organisation",
+    }
+    return methods.get(request.method)()
+    # return jsonify({"message": "Welcome to the organisation"})
+
+
 @app.route('/permission', methods=['GET', 'POST', 'DELETE', 'PUT'])
+@validate_token
 def permission():
     """
     1. Handle all those permissions 
@@ -70,6 +107,7 @@ def permission():
     3. GET - Fetch all permission requests who is responsible
     4. DELETE - Optional 
     """
+    # app_id = g.app_id
     obj = Permission()
     methods = {
         'GET': obj.get_permission_requested_list,
@@ -81,14 +119,14 @@ def permission():
 
 
 @app.route('/login', methods=['POST'])
+@set_organisation
 def login():
-    obj = Authentication()
+    obj = Authentication(g.app_id)
     role = request.args.get("role")
     return obj.authenticate_user(role)
 
 @app.route('/project', methods=['GET', 'POST', 'DELETE', 'PUT'])
 def project():
-    
     obj = Projects()
     methods = {
         'GET': obj.get_all_project,

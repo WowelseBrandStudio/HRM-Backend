@@ -1,5 +1,5 @@
 import datetime
-from mongoengine import connect, Document, StringField, EmailField, ListField, QuerySetManager, NotUniqueError, ValidationError, DoesNotExist,DateTimeField,DateField,IntField
+from mongoengine import connect, disconnect, Document, StringField, EmailField, ListField, QuerySetManager, NotUniqueError, ValidationError, DoesNotExist,DateTimeField,DateField,IntField
 import configparser
 
 # Read the config.ini file
@@ -9,10 +9,34 @@ config.read('config.ini')
 # Establish connection to MongoDB
 HOST = config.get('DEFAULT',"HOST")
 
+# def connect_to_db(db_name):
+#     """
+#     Connect to the database only when needed.
+#     """
+#     print(f"Connecting to MongoDB - {db_name}")
+    
+#     # Disconnect from the previous connection (if any)
+#     # disconnect('default')  # This disconnects the current 'default' connection
+    
+#     # Connect to the new database with a custom alias
+#     # connect(db_name, host=HOST, alias=db_name)
+#     connect(host=HOST, db=db_name, alias=db_name)
+
 connect(
     host = HOST,
-    db='company'
+    # db='company',
+    db='organisation_handler',
 )
+class organization(Document):
+    objects = QuerySetManager()
+    org_name = StringField(required=True)
+    org_type = StringField(required=True)
+    org_description = StringField()
+    created_at = DateTimeField(default=datetime.datetime.now)
+    api_key = StringField(required=True)
+    api_secret = StringField(required=True)
+    app_id = StringField(required=True)
+
 
 class permission_request(Document):
     objects = QuerySetManager()
