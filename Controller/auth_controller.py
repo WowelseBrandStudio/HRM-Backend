@@ -23,7 +23,9 @@ class Authentication:
     def authenticate_user(self, role):
         possible_roles = ['Admin', 'User', 'HR', 'Manager']
         if role not in possible_roles:
-            return jsonify({"mesage": "Invalid role"}), 400
+            return create_response(True,"Invalid role",None,None,400)
+
+
         data = request.get_json()
 
         if role == 'Admin':
@@ -40,12 +42,13 @@ class Authentication:
         user = collection_name.objects(email = username).first()
        
         if not user:
-            return jsonify({"message":"Email does not exists"})
+            return create_response(False,"Email does not exists",None,"Email does not exists",404)
+        
         
         # import pdb; pdb.set_trace()
         if  password != user["password"]:
-            # return jsonify({"mesage": "Password mismatch"}), 400
-            return create_response(False,"password mmismatch",None,"password mismatch",400)
+          
+            return create_response(False,"password mismatch",None,"password mismatch",404)
         
         payload = {
             "role": role,
@@ -55,5 +58,4 @@ class Authentication:
         }
        
         token = JWTHandler().generate_jwt(payload)
-        # return jsonify({"token": token}), 200
         return create_response(True,"login success",token,None,200)

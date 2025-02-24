@@ -2,7 +2,7 @@
 import datetime
 from flask import g, jsonify, request
 from Models.ModelSchemas import Human_resource
-from Utils.helper import roles_accepted, serialize_user
+from Utils.helper import create_response, roles_accepted, serialize_user
 
 
 class Human_resources:
@@ -31,7 +31,8 @@ class Human_resources:
 
         hr = Human_resource(**data)
         hr.save()
-        return jsonify({"message":"Hr created successfully"}),201
+        return create_response(True,"Hr created successfully",str(hr.id),None,201)
+
     
     @roles_accepted('Admin','Manager')
     def update_hr(self):
@@ -44,18 +45,21 @@ class Human_resources:
 
         hr = Human_resource.objects(id=id).first()
         if not hr:
-            return jsonify({"message":"Hr not found"}), 404
+            return create_response(True,"Hr not successfully",None,None,200)
+
     
         data.pop('id')  
         hr.update(**data)
-        return jsonify({"message": "Hr updated successfully"}),200
+        return create_response(True,"Hr updated successfully",str(hr.id),None,200)
+
     
     @roles_accepted('Admin', 'HR','Manager')    
     def get_all_hr(self):
 
         hr = Human_resource.objects()
         res_data = [serialize_user(record) for record in hr]
-        return jsonify({"message": "Hr retrevied successfully", "data": res_data}),200
+        return create_response(True,"Hr retrevied successfully",res_data,None,200)
+
     
     @roles_accepted('Admin','Manager')    
     def delete_hr(self):
@@ -65,6 +69,7 @@ class Human_resources:
         hr = Human_resource.objects(id=id).delete()
         
         if hr == 1:
-            return jsonify({"message":"Hr Deleted successfully"}), 200
+            return create_response(True,"Hr Deleted successfully",None,None,200)
+
         else:
-            return jsonify({"message":"Hr not found"}), 404
+            return create_response(True,"Hr not found",None,None,404)

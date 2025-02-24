@@ -1,7 +1,7 @@
 import datetime
 from flask import Flask, g, jsonify, request
 import jwt
-from mongoengine import connect, Document,DateField, StringField, EmailField, IntField,ListField, QuerySetManager, NotUniqueError, ValidationError, DoesNotExist,DateTimeField
+from mongoengine import connect, QuerySetManager, NotUniqueError, ValidationError, DoesNotExist
 from Controller.admin_controller import Admins
 from Controller.auth_controller import Authentication
 from Controller.bonus_tip_controller import Bonus_tip
@@ -35,34 +35,29 @@ app = Flask(__name__)
 
 @app.errorhandler(NotUniqueError)
 def handle_duplicate_error(error):
-    # return {"error": str(error)}, 400
     return create_response(False,"data duplication error",None,str(error),400)
 
 @app.errorhandler(ValidationError)
 def handle_validation_error(error):
-    # return {"error": str(error)}, 400
 
     return create_response(False,"validation error",None,str(error),400)
 
 @app.errorhandler(DoesNotExist)
 def handle_not_found_error(error):
-    # return {"error": str(error)}, 
     return create_response(False,"Data not found",None,str(error),400)
     
 
 @app.errorhandler(jwt.ExpiredSignatureError)
 def handle_signature_error(error):
-    # return jsonify({"error": "Token is expired"}), 403
     return create_response(False,"Token is expired",None,str(error),403)
 
 @app.errorhandler(jwt.InvalidTokenError)
 def  handle_invalid_token_error(error):
-    # return jsonify({"error": "Invalid token"}), 401
+  
     return create_response(False,"Invalid token",None,str(error),401)
 
 @app.errorhandler(Exception)
-def unknown_exception_err(error):
-    # return {"error": str(error)}, 500
+def unknown_exception_err(error):    
     return create_response(False,"Exceptional",None,str(error),401)
 
 
@@ -95,7 +90,7 @@ def organisation():
         'PUT': "update_organisation",
     }
     return methods.get(request.method)()
-    # return jsonify({"message": "Welcome to the organisation"})
+
 
 
 @app.route('/permission', methods=['GET', 'POST', 'DELETE', 'PUT'])

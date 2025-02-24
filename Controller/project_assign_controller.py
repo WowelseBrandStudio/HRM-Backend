@@ -2,7 +2,7 @@
 import datetime
 from flask import g, jsonify, request
 from Models.ModelSchemas import Project, Assign_project,Employee
-from Utils.helper import roles_accepted, serialize_user
+from Utils.helper import create_response, roles_accepted, serialize_user
 
 
 class Assign_projects:
@@ -28,7 +28,8 @@ class Assign_projects:
         assign_project = Assign_project(**data)
         assign_project.save()
 
-        return jsonify({"message":"Project assigned successfully"}),201
+        return create_response(True,"Project assigned successfully",str(assign_project.id),None,201)
+
     
     @roles_accepted('Admin', 'HR','Manager')
     def update_assign_project(self):
@@ -55,11 +56,14 @@ class Assign_projects:
         assign_project = Assign_project.objects(id=id).first()
         
         if not assign_project:
-            return jsonify({"message":"Project assign not found"}),404
+            return create_response(True,"Project assign not found",None,None,404)
+
     
         data.pop('id')  
         assign_project.update(**data)
-        return jsonify({"message": "Assign Project updated successfully"}),200
+        return create_response(True,"Assign Project updated successfully",str(assign_project.id),None,200)
+
+
     
     @roles_accepted('Admin', 'HR', 'User','Manager')        
     def get_all_assigned_project(self):
@@ -67,7 +71,8 @@ class Assign_projects:
         assign_project = Assign_project.objects()
 
         res_data = [serialize_user(record) for record in assign_project]
-        return jsonify({"message": "Assign Project retrevied successfully", "data": res_data}),200
+        return create_response(True,"Assign Project retrevied successfully",res_data,None,200)
+
     
     @roles_accepted('Admin', 'HR','Manager')    
     def delete_assign_project(self):
@@ -76,6 +81,8 @@ class Assign_projects:
         id = data.get("id")
         assign_project = Assign_project.objects(id=id).delete()
         if assign_project == 1:
-            return jsonify({"message":"Assign project Deleted successfully"}), 200
+            return create_response(True,"Assign project Deleted successfully",None,None,200)
+
         else:
-            return jsonify({"message":"Assign project not found"}), 404
+            return create_response(True,"Assign project not found",None,None,404)
+

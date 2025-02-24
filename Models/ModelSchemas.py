@@ -51,7 +51,7 @@ class permission_request(Document):
 class Project(Document):
     objects = QuerySetManager()
     project_name = StringField(required=True)
-    department = StringField(required=True)
+    department = StringField(required=True,choices = ['Development','Digital_marketing'])
     description = StringField()
     created_at = DateTimeField(default=datetime.datetime.now)
     created_by = StringField(required=True)

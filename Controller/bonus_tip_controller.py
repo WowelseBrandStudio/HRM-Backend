@@ -26,7 +26,8 @@ class Bonus_tip:
 
         bonus = Bonus.objects(id=id).first()
         if not bonus:
-            return jsonify({"message":"Bonus not found"}), 404
+            return create_response(True,"Bonus notsuccessfully",None,None,404)
+
     
         data.pop('id')  
         bonus.update(**data)
@@ -34,9 +35,11 @@ class Bonus_tip:
     
     @roles_accepted('HR','User')  
     def get_all_bonus(self):
-       
         data = request.args.to_dict()
+     
+        
         client_data=g.client_data
+    
         if client_data['role'] == 'User':
             user_id =client_data['user_id']
         else:            
@@ -47,9 +50,9 @@ class Bonus_tip:
         } if user_id else {}
 
         bonus = Bonus.objects(**user_filter)
+ 
 
         res_data = [serialize_user(record) for record in bonus]
-        # return jsonify({"message": "Bonus retrevied successfully", "data": res_data}),200
         return create_response(True,"Bonus retrevied successfully",res_data,None,200)
     
     @roles_accepted('HR')  
@@ -59,7 +62,6 @@ class Bonus_tip:
         id = data.get("id")
         bonus = Bonus.objects(id=id).delete()
         if bonus == 1 :
-            return jsonify({"message":"Bonus Deleted successfully"}), 200
-            
+            return create_response(True,"Bonus Deleted successfully",None,None,200)            
         else:
-            return jsonify({"message":"Bonus not found"}), 404  
+            return create_response(False,"Bonus not found",None,None,200)

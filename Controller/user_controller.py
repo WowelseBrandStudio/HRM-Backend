@@ -2,7 +2,7 @@
 import datetime
 from flask import g, jsonify, request
 from Models.ModelSchemas import Employee
-from Utils.helper import roles_accepted, serialize_user
+from Utils.helper import create_response, roles_accepted, serialize_user
 
 
 class Employees:
@@ -30,7 +30,8 @@ class Employees:
 
         user = Employee(**data)
         user.save()
-        return jsonify({"message":"Employee created successfully"}),201
+        return create_response(True,"Employee created successfully",str(user.id),None,201)
+
     
     @roles_accepted('Admin', 'HR','Manager')
     def update_employee(self):
@@ -42,11 +43,12 @@ class Employees:
 
         user = Employee.objects(id=id).first()
         if not user:
-            return jsonify({"message":"Employee not found"}), 404
-    
+            return create_response(True,"Employee not found",None,None,404)
+
         data.pop('id')  
         user.update(**data)
-        return jsonify({"message": "Employee updated successfully"}),200
+        return create_response(True,"Employee updated successfully",str(user.id),None,200)
+
     
     @roles_accepted('Admin', 'HR', 'User','Manager')
     def get_all_employee(self):
@@ -61,7 +63,8 @@ class Employees:
         roles.get(client_data['role'], lambda: None)()
         user = Employee.objects(**filter)
         res_data = [serialize_user(record) for record in user]
-        return jsonify({"message": "Employee retrevied successfully", "data": res_data}),200
+        return create_response(True,"Employee retrevied successfully",res_data,None,200)
+
     
     @roles_accepted('Admin', 'HR','Manager')
     def delete_employee(self):
@@ -70,6 +73,7 @@ class Employees:
         id = data.get("id")
         user = Employee.objects(id=id).delete()
         if user == 1 :
-            return jsonify({"message":"Employee Deleted successfully"}), 200
+            return create_response(True,"Employee Deleted successfully",None,None,200)
+
         else:
-            return jsonify({"message":"Employee not found"}), 404  
+            return create_response(True,"Employee not found",None,None,200)
