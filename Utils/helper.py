@@ -3,14 +3,22 @@ from functools import wraps
 
 from flask import g, jsonify, request
 import jwt
+from mongoengine import  disconnect,connect
 
-from Models.ModelSchemas import organization
+from Models.ModelSchemas import HOST, organization
 
 
 def serialize_user(user):
     user_dict = user.to_mongo().to_dict()  # Convert to dict
     user_dict["_id"] = str(user_dict["_id"])  # Convert ObjectId to string
     return user_dict
+
+def connect_to_db(db_name):
+        # Dynamically switch the database based on app_id
+        connect(
+            host = HOST,
+            db = db_name,
+        )
 
 def set_organisation(f):
     @wraps(f)
@@ -24,9 +32,10 @@ def set_organisation(f):
         api_key = request.headers.get('x-api-key')
         api_secret = request.headers.get('x-api-secret')
         
-        # connect_to_db('organisation_handler')
+        disconnect('default')
+        connect_to_db('organisation_handler')
         org = organization.objects(api_key=api_key, api_secret=api_secret).first()
-    
+        
         if not org:
             return create_response(True,"Invalid API key or secret",None,None,403)
 
@@ -64,11 +73,11 @@ def roles_accepted(*roles):
             # if not decode_data:
             #     return jsonify({"error": "Invalid token"}), 403
             # user_role = decode_data['role']  #NOTE: Get the role from token
-            # g.client_data = decode_data 
+            # g.payload = decode_data 
             # g.payload = jsonify(decode_data)
            
             if g.payload['role'] not in roles:
-                return create_response(True,"Unauthorized",None,None,403)
+                return create_response(True,"Unauthorized",f"Allowed roles{roles}",None,403)
 
             return func(*args, **kwargs)
         return wrapper

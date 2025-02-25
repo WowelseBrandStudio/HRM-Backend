@@ -1,13 +1,27 @@
 
 import datetime
 from flask import g, jsonify, request
-from Models.ModelSchemas import Human_resource
+from Models.ModelSchemas import HOST, Human_resource
 from Utils.helper import create_response, roles_accepted, serialize_user
+from mongoengine import connect, disconnect
+
 
 
 class Human_resources:
     def __init__(self):
-        pass
+        db_name = g.payload['app_id']
+        
+        
+        disconnect('default')
+        self.connect_to_db(db_name)
+      
+
+    def connect_to_db(self, db_name):
+        # Dynamically switch the database based on app_id
+        connect(
+            host = HOST,
+            db = db_name,
+        )
 
     @roles_accepted('Admin','Manager')
     
@@ -15,7 +29,7 @@ class Human_resources:
 
         data = request.form.to_dict()       
        
-        client_data = g.client_data
+        client_data = g.payload
         data['created_by'] = client_data['user_id']
         data['created_by_role'] = client_data['role']
         
@@ -44,19 +58,32 @@ class Human_resources:
         data['modified_at'] = datetime.datetime.now
 
         hr = Human_resource.objects(id=id).first()
+       
         if not hr:
-            return create_response(True,"Hr not successfully",None,None,200)
+            return create_response(True,"Hr not found",None,None,404)
 
-    
-        data.pop('id')  
+        data.pop('id')          
         hr.update(**data)
-        return create_response(True,"Hr updated successfully",str(hr.id),None,200)
+        return create_response(True,"Hr updated successfully",None,None,200)
 
     
     @roles_accepted('Admin', 'HR','Manager')    
     def get_all_hr(self):
+        data = request.args.to_dict()     
 
-        hr = Human_resource.objects()
+        client_data=g.payload
+    
+        if client_data['role'] == 'HR':
+            hr_id =client_data['user_id']
+        else:            
+            hr_id =  data.get('hr_id') 
+                
+        user_filter={
+            'id':hr_id
+        } if hr_id else {}
+        
+        hr = Human_resource.objects(**user_filter)
+
         res_data = [serialize_user(record) for record in hr]
         return create_response(True,"Hr retrevied successfully",res_data,None,200)
 

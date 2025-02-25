@@ -22,11 +22,11 @@ HOST = config.get('DEFAULT',"HOST")
 #     # connect(db_name, host=HOST, alias=db_name)
 #     connect(host=HOST, db=db_name, alias=db_name)
 
-connect(
-    host = HOST,
-    # db='company',
-    db='organisation_handler',
-)
+# connect(
+#     host = HOST,
+#     # db='company',
+#     db='organisation_handler',
+# )
 class organization(Document):
     objects = QuerySetManager()
     org_name = StringField(required=True)

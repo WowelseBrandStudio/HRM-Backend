@@ -1,13 +1,28 @@
 
 import datetime
 from flask import g, jsonify, request
-from Models.ModelSchemas import Admin
+from Models.ModelSchemas import HOST, Admin
 from Utils.helper import create_response, roles_accepted, serialize_user
+from mongoengine import connect, disconnect
+
 
 
 class Admins:
     def __init__(self):
-        pass
+        db_name = g.payload['app_id']
+       
+        
+        disconnect('default')
+        self.connect_to_db(db_name)
+      
+
+    def connect_to_db(self, db_name):
+        # Dynamically switch the database based on app_id
+        connect(
+            host = HOST,
+            db = db_name,
+        )
+
 
     @roles_accepted('Admin')    
     def insert_admin(self):
@@ -36,13 +51,12 @@ class Admins:
     def update_admin(self):
   
         data = request.form.to_dict()      
-        client_data=g.client_data        
+        client_data=g.payload        
         id =client_data['user_id']
         admin = Admin.objects(id=id).first()
         if not admin:
             return create_response(False,"Admin not found",None,None,200)
-
-    
+            
         admin.update(**data)
         
         return create_response(True,"Admin updated successfully",str(admin.id),None,200)
@@ -50,8 +64,8 @@ class Admins:
     @roles_accepted('Admin')    
     def get_all_admin(self):
        
-        client_data=g.client_data        
-        user_id =client_data['user_id']
+        client_data=g.payload        
+        user_id =client_data['user_id']   
         
         admin = Admin.objects(id = user_id)
         res_data = [serialize_user(record) for record in admin]
@@ -61,7 +75,7 @@ class Admins:
     @roles_accepted('Admin')  
     def delete_admin(self):
     
-        client_data=g.client_data        
+        client_data=g.payload        
         id =client_data['user_id']
         
         admin = Admin.objects(id=id).delete()

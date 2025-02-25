@@ -1,13 +1,25 @@
 
 import datetime
 from flask import g, jsonify, request
-from Models.ModelSchemas import Project, Assign_project,Employee
+from Models.ModelSchemas import HOST, Human_resource, Manager, Project, Assign_project,Employee
 from Utils.helper import create_response, roles_accepted, serialize_user
+from mongoengine import connect, disconnect
 
 
 class Assign_projects:
     def __init__(self):
-        pass
+        db_name = g.payload['app_id']
+        
+        disconnect('default')
+        self.connect_to_db(db_name)
+      
+
+    def connect_to_db(self, db_name):
+        # Dynamically switch the database based on app_id
+        connect(
+            host = HOST,
+            db = db_name,
+        )
 
     @roles_accepted('Admin', 'HR','Manager')    
     def insert_assign_project(self):
@@ -18,8 +30,21 @@ class Assign_projects:
         project = Project.objects(id=project_id).first()
 
         user_id = data.get('user_id')
-        user = Employee.objects(id=user_id).first()
-        client_data = g.client_data
+        
+
+        
+        client_data = g.payload
+        
+        if client_data['role'] == 'HR':
+            collection_name = Human_resource
+        elif client_data['role'] == 'User':
+            collection_name = Employee
+        elif client_data['role'] == 'Manager':
+            collection_name = Manager
+       
+
+        user = collection_name.objects(id=user_id).first()
+
         data['assigned_by'] = client_data['user_id']
         data['assigned_by_role'] = client_data['role']
         data['project_name'] = project['project_name']
@@ -65,10 +90,23 @@ class Assign_projects:
 
 
     
-    @roles_accepted('Admin', 'HR', 'User','Manager')        
+    # @roles_accepted('Admin', 'HR', 'User','Manager')        
     def get_all_assigned_project(self):
+        
+        data = request.args.to_dict()     
 
-        assign_project = Assign_project.objects()
+        client_data=g.payload
+    
+        if client_data['role'] != 'Admin':
+            user_id =client_data['user_id']
+        else:            
+            user_id =  data.get('user_id') 
+                
+        user_filter={
+            'user_id':user_id
+        } if user_id else {}
+        
+        assign_project = Assign_project.objects(**user_filter)
 
         res_data = [serialize_user(record) for record in assign_project]
         return create_response(True,"Assign Project retrevied successfully",res_data,None,200)

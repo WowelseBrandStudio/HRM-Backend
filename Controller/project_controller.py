@@ -1,20 +1,32 @@
 
 import datetime
 from flask import g, jsonify, request
-from Models.ModelSchemas import Project
+from Models.ModelSchemas import HOST, Project
 from Utils.helper import create_response, roles_accepted, serialize_user
+from mongoengine import connect, disconnect
 
 
 class Projects:
     def __init__(self):
-        pass
+        db_name = g.payload['app_id']
+        
+        disconnect('default')
+        self.connect_to_db(db_name)
+      
+
+    def connect_to_db(self, db_name):
+        # Dynamically switch the database based on app_id
+        connect(
+            host = HOST,
+            db = db_name,
+        )
 
     @roles_accepted('Admin', 'HR','Manager')    
     def insert_project(self):
 
         data = request.get_json()       
        
-        client_data = g.client_data
+        client_data = g.payload
         data['created_by'] = client_data['user_id']
         data['created_by_role'] = client_data['role']
 
@@ -41,7 +53,7 @@ class Projects:
         return create_response(True,"Project updated successfull",str(project.id),None,200)
 
     
-    @roles_accepted('Admin', 'HR', 'User','Manager')    
+    # @roles_accepted('Admin', 'HR', 'User','Manager')    
     def get_all_project(self):
 
         project = Project.objects()
@@ -49,7 +61,7 @@ class Projects:
         return create_response(True,"Project retrevied successfully",res_data,None,200)
 
     
-    @roles_accepted('Admin', 'HR', 'User','Manager')    
+    # @roles_accepted('Admin', 'HR', 'User','Manager')    
     def delete_project(self):
     
         data = request.get_json()
