@@ -1,13 +1,25 @@
 
 import datetime
 from flask import g, jsonify, request
-from Models.ModelSchemas import Bonus
+from Models.ModelSchemas import HOST, Bonus
 from Utils.helper import create_response, roles_accepted, serialize_user
+from mongoengine import connect, disconnect
 
 
 class Bonus_tip:
     def __init__(self):
-        pass
+        db_name = g.payload['app_id']
+        
+        disconnect('default')
+        self.connect_to_db(db_name)
+      
+
+    def connect_to_db(self, db_name):
+        # Dynamically switch the database based on app_id
+        connect(
+            host = HOST,
+            db = db_name,
+        )
 
     @roles_accepted('HR')    
     def insert_bonus(self):
@@ -26,7 +38,7 @@ class Bonus_tip:
 
         bonus = Bonus.objects(id=id).first()
         if not bonus:
-            return create_response(True,"Bonus notsuccessfully",None,None,404)
+            return create_response(True,"Bonus not found",None,None,404)
 
     
         data.pop('id')  
@@ -35,10 +47,9 @@ class Bonus_tip:
     
     @roles_accepted('HR','User')  
     def get_all_bonus(self):
-        data = request.args.to_dict()
-     
+        data = request.args.to_dict()     
         
-        client_data=g.client_data
+        client_data=g.payload
     
         if client_data['role'] == 'User':
             user_id =client_data['user_id']
@@ -48,9 +59,8 @@ class Bonus_tip:
         user_filter={
             'user_id':user_id
         } if user_id else {}
-
+        
         bonus = Bonus.objects(**user_filter)
- 
 
         res_data = [serialize_user(record) for record in bonus]
         return create_response(True,"Bonus retrevied successfully",res_data,None,200)
