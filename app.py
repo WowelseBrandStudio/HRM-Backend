@@ -17,10 +17,11 @@ from Controller.project_controller import Projects
 from Controller.timesheet_controller import Timesheets
 
 from mongoengine import disconnect
+from flask_cors import CORS
 
 #testS
 app = Flask(__name__)
-
+CORS(app)
 # connect(
 #     host = 'mongodb+srv://user:user@wowelse1.c179k.mongodb.net/?retryWrites=true&w=majority&appName=wowelse1',
 #     db='company'
@@ -39,7 +40,6 @@ def handle_duplicate_error(error):
 
 @app.errorhandler(ValidationError)
 def handle_validation_error(error):
-
     return create_response(False,"validation error",None,str(error),400)
 
 @app.errorhandler(DoesNotExist)
