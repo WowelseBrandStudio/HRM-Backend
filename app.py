@@ -5,13 +5,13 @@ from mongoengine import connect, QuerySetManager, NotUniqueError, ValidationErro
 from Controller.admin_controller import Admins
 from Controller.auth_controller import Authentication
 from Controller.bonus_tip_controller import Bonus_tip
+from Controller.dashboard_controller import Dashboard, UserInfo
 from Controller.hr_controller import  Human_resources
 from Controller.manager_controller import Managers
 from Controller.organisation_controller import Organization
 from Controller.permission_controller import Permission
 from Controller.user_controller import Employees
-from Models.ModelSchemas import Manager
-from Utils.helper import create_response, roles_accepted, set_organisation, validate_token
+from Utils.helper import create_response, set_organisation, validate_token
 from Controller.project_assign_controller import Assign_projects
 from Controller.project_controller import Projects
 from Controller.timesheet_controller import Timesheets
@@ -226,6 +226,27 @@ def bonus_tip():
         'POST': obj.insert_bonus,
         'PUT': obj.update_bonus,
         'DELETE': obj.delete_bonus,
+    }
+    return methods.get(request.method)()
+
+
+@app.route('/user_info', methods=['GET'])
+@validate_token
+def user_info():
+    
+    obj = UserInfo()
+    methods = {
+        'GET': obj.user_info,        
+    }
+    return methods.get(request.method)()
+
+
+@app.route('/dashboard_count', methods=['GET'])
+@validate_token
+def dashboard_count():
+    obj = Dashboard()
+    methods = {
+        'GET': obj.dashboard_count,        
     }
     return methods.get(request.method)()
 

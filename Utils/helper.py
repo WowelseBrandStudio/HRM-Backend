@@ -90,7 +90,7 @@ class JWTHandler:
 
     def generate_jwt(self, payload: dict) -> str:
         expiration_time = datetime.datetime.now(
-        ) + datetime.timedelta(minutes=120)  # Token expires in 1 hour
+        ) + datetime.timedelta(hours=10)  # Token expires in 1 hour
         payload['exp'] = expiration_time.timestamp()
         token = jwt.encode(payload, self.SECRET_KEY, algorithm="HS256")
         return token
