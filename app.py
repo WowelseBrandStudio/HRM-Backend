@@ -121,6 +121,7 @@ def login():
     return obj.authenticate_user(role)
 
 @app.route('/project', methods=['GET', 'POST', 'DELETE', 'PUT'])
+@validate_token
 def project():
     obj = Projects()
     methods = {
@@ -133,6 +134,7 @@ def project():
 
 
 @app.route('/assign_project', methods=['GET', 'POST', 'DELETE', 'PUT'])
+@validate_token
 def assign_project():
     
     obj = Assign_projects()
@@ -146,6 +148,7 @@ def assign_project():
 
 
 @app.route('/timesheet', methods=['GET', 'POST', 'DELETE', 'PUT'])
+@validate_token
 def timesheet():
     
     obj = Timesheets()
@@ -158,6 +161,7 @@ def timesheet():
     return methods.get(request.method)()
 
 @app.route('/employee', methods=['GET', 'POST', 'DELETE', 'PUT'])
+@validate_token
 def employee():
     
     obj = Employees()
@@ -171,6 +175,7 @@ def employee():
 
 
 @app.route('/admin', methods=['GET', 'POST', 'DELETE', 'PUT'])
+@validate_token
 def admin():
     
     obj = Admins()
@@ -184,6 +189,7 @@ def admin():
 
 
 @app.route('/hr', methods=['GET', 'POST', 'DELETE', 'PUT'])
+@validate_token
 def human_resource():
     
     obj = Human_resources()
@@ -197,6 +203,7 @@ def human_resource():
 
 
 @app.route('/manager', methods=['GET', 'POST', 'DELETE', 'PUT'])
+@validate_token
 def manager():
     
     obj = Managers()
@@ -210,6 +217,7 @@ def manager():
 
 
 @app.route('/bonus_tip', methods=['GET', 'POST', 'DELETE', 'PUT'])
+@validate_token
 def bonus_tip():
     
     obj = Bonus_tip()

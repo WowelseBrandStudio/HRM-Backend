@@ -1,20 +1,32 @@
 
 import datetime
 from flask import g, jsonify, request
-from Models.ModelSchemas import Manager
+from Models.ModelSchemas import HOST, Manager
 from Utils.helper import create_response, roles_accepted, serialize_user
+from mongoengine import connect, disconnect
 
 
 class Managers:
     def __init__(self):
-        pass
+        db_name = g.payload['app_id']
+        
+        disconnect('default')
+        self.connect_to_db(db_name)
+      
+
+    def connect_to_db(self, db_name):
+        # Dynamically switch the database based on app_id
+        connect(
+            host = HOST,
+            db = db_name,
+        )
 
     @roles_accepted('Admin')    
     def insert_manager(self):
 
         data = request.form.to_dict()       
         
-        client_data = g.client_data
+        client_data = g.payload
         data['created_by'] = client_data['user_id']
         data['created_by_role'] = client_data['role']
         manager = Manager.objects().order_by('-created_at').first() 
@@ -29,7 +41,7 @@ class Managers:
 
         manager = Manager(**data)
         manager.save()
-        return create_response(True,"Manager retrevied successfully",str(manager.id),None,201)
+        return create_response(True,"Manager created successfully",str(manager.id),None,201)
 
     
     @roles_accepted('Admin')
@@ -42,7 +54,7 @@ class Managers:
 
         manager = Manager.objects(id=id).first()
         if not manager:
-            return create_response(True,"Manager not found successfully",None,None,404)
+            return create_response(True,"Manager not found ",None,None,404)
 
     
         data.pop('id')  
@@ -52,8 +64,21 @@ class Managers:
     
     @roles_accepted('Admin','Manager')    
     def get_all_manager(self):
+        data = request.args.to_dict()     
+        
+        client_data=g.payload
+    
+        if client_data['role'] == 'Manager':
+            manager_id =client_data['user_id']
+        else:            
+            manager_id =  data.get('manager_id') 
+                
+        user_filter={
+            'id':manager_id
+        } if manager_id else {}
+        
+        manager = Manager.objects(**user_filter)
 
-        manager = Manager.objects()
         res_data = [serialize_user(record) for record in manager]
         return create_response(True,"Manager retrevied successfully",res_data,None,200)
 

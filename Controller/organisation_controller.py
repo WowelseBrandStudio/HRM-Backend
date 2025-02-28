@@ -1,12 +1,24 @@
-from flask import request
+from flask import g, request
 
-from Models.ModelSchemas import organization
+from Models.ModelSchemas import HOST, organization
 from Utils.helper import create_response, serialize_user
+from mongoengine import connect, disconnect
 
 
 class Organization:
     def __init__(self):
-        pass
+        db_name = g.payload['app_id']
+        
+        disconnect('default')
+        self.connect_to_db(db_name)
+      
+
+    def connect_to_db(self, db_name):
+        # Dynamically switch the database based on app_id
+        connect(
+            host = HOST,
+            db = db_name,
+        )
     
     def insert_organization(self):
         """

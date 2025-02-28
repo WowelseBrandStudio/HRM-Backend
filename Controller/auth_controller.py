@@ -18,7 +18,7 @@ class Authentication:
             host = HOST,
             db = db_name,
         )
-        print(f"Connecting to the database: {self.app_id}")
+      
 
     def authenticate_user(self, role):
         possible_roles = ['Admin', 'User', 'HR', 'Manager']

@@ -1,20 +1,32 @@
 
 import datetime
 from flask import g, jsonify, request
-from Models.ModelSchemas import Employee
+from Models.ModelSchemas import HOST, Employee
 from Utils.helper import create_response, roles_accepted, serialize_user
+from mongoengine import connect, disconnect
 
 
 class Employees:
     def __init__(self):
-        pass
+        db_name = g.payload['app_id']
+        
+        disconnect('default')
+        self.connect_to_db(db_name)
+      
+
+    def connect_to_db(self, db_name):
+        # Dynamically switch the database based on app_id
+        connect(
+            host = HOST,
+            db = db_name,
+        )
 
     @roles_accepted('Admin', 'HR','Manager')    
     def insert_employee(self):
         
         data = request.form.to_dict()  
        
-        client_data = g.client_data
+        client_data = g.payload
         data['created_by'] = client_data['user_id']
         data['created_by_role'] = client_data['role']
        
@@ -50,18 +62,21 @@ class Employees:
         return create_response(True,"Employee updated successfully",str(user.id),None,200)
 
     
-    @roles_accepted('Admin', 'HR', 'User','Manager')
+    # @roles_accepted('Admin', 'HR', 'User','Manager')
     def get_all_employee(self):
-        client_data=g.client_data
+        client_data=g.payload
         filter = request.args.to_dict()
+        
         roles = {
             'Manager': lambda: filter.update({"responsible_manager": client_data['user_id']}),
             'HR': lambda: filter.update({"responsible_hr": client_data['user_id']}),
             'User': lambda: filter.update({"id": client_data['user_id']})
             # 'Admin': lambda: filter.update({})
         }
+       
         roles.get(client_data['role'], lambda: None)()
         user = Employee.objects(**filter)
+       
         res_data = [serialize_user(record) for record in user]
         return create_response(True,"Employee retrevied successfully",res_data,None,200)
 
