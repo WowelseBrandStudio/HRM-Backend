@@ -41,7 +41,7 @@ class Timesheets:
         user = collection_name.objects(id=client_data['user_id']).first()
 
         data['user_id'] = client_data['user_id']
-        data['user_name'] = user['name']
+        data['user_name'] = user['first_name']
         data['project_name'] = project['project_name']
       
         

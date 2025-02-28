@@ -77,6 +77,7 @@ class Timesheet(Document):
     project_id = StringField(required=True)
     project_name = StringField(required=True)
     description = StringField(required=True)
+    title = StringField(required=True)
     date = DateField(required=True)
     from_time = StringField(required=True)
     to_time = StringField(required=True)    
