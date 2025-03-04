@@ -8,12 +8,10 @@ from mongoengine import connect, disconnect
 
 class UserInfo:
     def __init__(self):
-        db_name = g.payload['app_id']
-       
+        db_name = g.payload['app_id']      
         
         disconnect('default')
-        self.connect_to_db(db_name)
-      
+        self.connect_to_db(db_name)      
 
     def connect_to_db(self, db_name):
         # Dynamically switch the database based on app_id
@@ -21,7 +19,6 @@ class UserInfo:
             host = HOST,
             db = db_name,
         )
-
 
     def user_info(self):
             client_data=g.payload
@@ -70,13 +67,13 @@ class Dashboard:
         
             elif client_data['role'] == 'Manager':
                 res_data['hr_count'] = len(Human_resource.objects())
-                res_data['employee_count'] = len(Employee.objects())
+                res_data['employee_count'] = len(Employee.objects(responsible_manager = client_data['user_id']))
 
                 # Manager count not necessary for manager role
                 res_data['manager_count'] = 0  
 
             elif client_data['role'] == 'HR':
-                res_data['employee_count'] = len(Employee.objects())
+                res_data['employee_count'] = len(Employee.objects(responsible_hr=client_data['user_id']))
 
                 # Manager and hr count not necessary for hr role
                 res_data['manager_count'] = 0

@@ -1,11 +1,13 @@
 import datetime
 from flask import Flask, g, jsonify, request
+from flask_mail import Mail, Message
 import jwt
 from mongoengine import connect, QuerySetManager, NotUniqueError, ValidationError, DoesNotExist
 from Controller.admin_controller import Admins
 from Controller.auth_controller import Authentication
 from Controller.bonus_tip_controller import Bonus_tip
 from Controller.dashboard_controller import Dashboard, UserInfo
+from Controller.email_controller import init_mail
 from Controller.hr_controller import  Human_resources
 from Controller.manager_controller import Managers
 from Controller.organisation_controller import Organization
@@ -33,6 +35,16 @@ CORS(app)
 #     print("Disconnecting from the database")
 #     disconnect('default')
 #     return response
+
+app.config['MAIL_SERVER'] = 'smtp.gmail.com'
+app.config['MAIL_PORT'] = 587
+app.config['MAIL_USE_TLS'] = True
+app.config['MAIL_USE_SSL'] = False
+app.config['MAIL_USERNAME'] = 'hrm25085@gmail.com'
+app.config['MAIL_PASSWORD'] = 'bzbn azkg yeok cpia'
+app.config['MAIL_DEFAULT_SENDER'] = 'hrm25085@gmail.com'
+init_mail(app)
+
 
 @app.errorhandler(NotUniqueError)
 def handle_duplicate_error(error):

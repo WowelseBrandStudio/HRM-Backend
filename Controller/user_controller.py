@@ -1,6 +1,7 @@
 
 import datetime
-from flask import g, jsonify, request
+from flask import g, jsonify, render_template, request
+from Controller.email_controller import send_mail
 from Models.ModelSchemas import HOST, Employee
 from Utils.helper import create_response, roles_accepted, serialize_user
 from mongoengine import connect, disconnect
@@ -9,10 +10,8 @@ from mongoengine import connect, disconnect
 class Employees:
     def __init__(self):
         db_name = g.payload['app_id']
-        
         disconnect('default')
-        self.connect_to_db(db_name)
-      
+        self.connect_to_db(db_name)      
 
     def connect_to_db(self, db_name):
         # Dynamically switch the database based on app_id
@@ -42,6 +41,10 @@ class Employees:
 
         user = Employee(**data)
         user.save()
+        
+        html_template = render_template('registration_template.html',email=data.get('email'),password=data.get('password'),login_url='https://wowelse.com/')
+        send_mail(data.get('email'),"Registration successfull",html_template,'hrm25085@gmail.com')
+        
         return create_response(True,"Employee created successfully",str(user.id),None,201)
 
     
@@ -64,6 +67,7 @@ class Employees:
     
     # @roles_accepted('Admin', 'HR', 'User','Manager')
     def get_all_employee(self):
+        
         client_data=g.payload
         filter = request.args.to_dict()
         

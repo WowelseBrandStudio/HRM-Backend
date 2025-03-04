@@ -28,27 +28,21 @@ class Assign_projects:
 
         project_id = data.get('project_id')
         project = Project.objects(id=project_id).first()
-
+      
+        if not project:
+            return create_response(False,"Project Id not found",None,"Incorrect project id",400)
+        
         user_id = data.get('user_id')
-        
-
-        
         client_data = g.payload
-        
-        if client_data['role'] == 'HR':
-            collection_name = Human_resource
-        elif client_data['role'] == 'User':
-            collection_name = Employee
-        elif client_data['role'] == 'Manager':
-            collection_name = Manager
+     
+        user = Employee.objects(id=user_id).first()
+        if not user:
+            return create_response(False,"User not found",None,"Incorrect user id",400)
        
-
-        user = collection_name.objects(id=user_id).first()
-
         data['assigned_by'] = client_data['user_id']
         data['assigned_by_role'] = client_data['role']
         data['project_name'] = project['project_name']
-        data['user_name'] = user['name']
+        data['user_name'] = user['first_name']
         
         assign_project = Assign_project(**data)
         assign_project.save()
