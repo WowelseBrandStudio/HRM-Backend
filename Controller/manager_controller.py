@@ -1,6 +1,7 @@
 
 import datetime
-from flask import g, jsonify, request
+from flask import g, jsonify, render_template, request
+from Controller.email_controller import send_mail
 from Models.ModelSchemas import HOST, Manager
 from Utils.helper import create_response, roles_accepted, serialize_user
 from mongoengine import connect, disconnect
@@ -41,6 +42,10 @@ class Managers:
 
         manager = Manager(**data)
         manager.save()
+                
+        html_template = render_template('registration_template.html',email=data.get('email'),password=data.get('password'),login_url='https://wowelse.com/')
+        send_mail(data.get('email'),"Registration successfull",html_template,'hrm25085@gmail.com')
+        
         return create_response(True,"Manager created successfully",str(manager.id),None,201)
 
     

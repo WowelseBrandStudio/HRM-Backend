@@ -1,17 +1,19 @@
 import datetime
 from flask import Flask, g, jsonify, request
+from flask_mail import Mail, Message
 import jwt
 from mongoengine import connect, QuerySetManager, NotUniqueError, ValidationError, DoesNotExist
 from Controller.admin_controller import Admins
 from Controller.auth_controller import Authentication
 from Controller.bonus_tip_controller import Bonus_tip
+from Controller.dashboard_controller import Dashboard, UserInfo
+from Controller.email_controller import init_mail
 from Controller.hr_controller import  Human_resources
 from Controller.manager_controller import Managers
 from Controller.organisation_controller import Organization
 from Controller.permission_controller import Permission
 from Controller.user_controller import Employees
-from Models.ModelSchemas import Manager
-from Utils.helper import create_response, roles_accepted, set_organisation, validate_token
+from Utils.helper import create_response, set_organisation, validate_token
 from Controller.project_assign_controller import Assign_projects
 from Controller.project_controller import Projects
 from Controller.timesheet_controller import Timesheets
@@ -33,6 +35,16 @@ CORS(app)
 #     print("Disconnecting from the database")
 #     disconnect('default')
 #     return response
+
+app.config['MAIL_SERVER'] = 'smtp.gmail.com'
+app.config['MAIL_PORT'] = 587
+app.config['MAIL_USE_TLS'] = True
+app.config['MAIL_USE_SSL'] = False
+app.config['MAIL_USERNAME'] = 'hrm25085@gmail.com'
+app.config['MAIL_PASSWORD'] = 'bzbn azkg yeok cpia'
+app.config['MAIL_DEFAULT_SENDER'] = 'hrm25085@gmail.com'
+init_mail(app)
+
 
 @app.errorhandler(NotUniqueError)
 def handle_duplicate_error(error):
@@ -226,6 +238,27 @@ def bonus_tip():
         'POST': obj.insert_bonus,
         'PUT': obj.update_bonus,
         'DELETE': obj.delete_bonus,
+    }
+    return methods.get(request.method)()
+
+
+@app.route('/user_info', methods=['GET'])
+@validate_token
+def user_info():
+    
+    obj = UserInfo()
+    methods = {
+        'GET': obj.user_info,        
+    }
+    return methods.get(request.method)()
+
+
+@app.route('/dashboard_count', methods=['GET'])
+@validate_token
+def dashboard_count():
+    obj = Dashboard()
+    methods = {
+        'GET': obj.dashboard_count,        
     }
     return methods.get(request.method)()
 

@@ -41,7 +41,7 @@ class Timesheets:
         user = collection_name.objects(id=client_data['user_id']).first()
 
         data['user_id'] = client_data['user_id']
-        data['user_name'] = user['name']
+        data['user_name'] = user['first_name']
         data['project_name'] = project['project_name']
       
         
@@ -79,8 +79,20 @@ class Timesheets:
     
     # @roles_accepted('Admin', 'HR', 'User','Manager')
     def get_all_timesheet(self):
-
-        timesheet = Timesheet.objects()
+        client_data = g.payload
+        data = request.args.to_dict()
+      
+        
+        if client_data['role'] == 'User':
+            user_id =client_data['user_id']
+        else:            
+            user_id =  data.get('user_id') 
+                
+        user_filter={
+            'user_id':user_id
+        } if user_id else {}
+        
+        timesheet = Timesheet.objects(**user_filter)
 
         res_data = [serialize_user(record) for record in timesheet]
         return create_response(True,"Timesheet retrevied successfully",res_data,None,200)
