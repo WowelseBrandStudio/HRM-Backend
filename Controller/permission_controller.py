@@ -1,6 +1,6 @@
 
 from flask import g, jsonify, request
-from Models.ModelSchemas import HOST, permission_request
+from Models.ModelSchemas import HOST, Employee, permission_request
 from Utils.helper import create_response, roles_accepted, serialize_user
 from mongoengine import connect, disconnect
 
@@ -22,7 +22,27 @@ class Permission:
 
     # @roles_accepted('Admin', 'HR', 'User','Manager')
     def get_permission_requested_list(self):
-        res_obj = permission_request.objects()
+        filter = request.args.to_dict()
+        client_data = g.payload
+        user_id = client_data['user_id']
+        role = client_data['role']
+       
+        if role == 'Manager':        
+            # Manager sees leave requests of employees they are responsible for
+            employees_under_manager = Employee.objects(responsible_manager=user_id).only('id')            
+            employee_ids = [str(emp.id) for emp in employees_under_manager] 
+            filter.update({"user_id__in": employee_ids})   
+
+        elif role == 'HR':
+            # HR sees leave requests of employees they are responsible for
+            employees_under_hr = Employee.objects(responsible_hr=user_id)
+            employee_ids = [str(emp.id) for emp in employees_under_hr]
+            filter.update({"user_id__in": employee_ids}) 
+
+        elif role == 'User':
+            filter.update({"user_id": user_id})
+        
+        res_obj = permission_request.objects(**filter)
         res_data = [serialize_user(record) for record in res_obj]
         
         return create_response(True,"Permission request",res_data,None,200)
@@ -34,6 +54,8 @@ class Permission:
         1. User can request for permission | (insert the information in collection)
         """
         data = request.get_json()
+        client_data = g.payload
+        data['user_id'] = client_data['user_id']
         res_obj = permission_request(**data)
         res_obj.save()
         return create_response(True,"Permission request submitted",str(res_obj.id),None,201)

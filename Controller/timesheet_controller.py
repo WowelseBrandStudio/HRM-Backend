@@ -80,8 +80,7 @@ class Timesheets:
     # @roles_accepted('Admin', 'HR', 'User','Manager')
     def get_all_timesheet(self):
         client_data = g.payload
-        data = request.args.to_dict()
-      
+        data = request.args.to_dict()      
         
         if client_data['role'] == 'User':
             user_id =client_data['user_id']
@@ -96,7 +95,6 @@ class Timesheets:
 
         res_data = [serialize_user(record) for record in timesheet]
         return create_response(True,"Timesheet retrevied successfully",res_data,None,200)
-
     
     @roles_accepted('HR', 'User','Manager')
     def delete_timesheet(self):

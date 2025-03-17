@@ -43,9 +43,14 @@ class permission_request(Document):
     leave_type = StringField(required=True, default = 'cl', choices = ['cl', 'sick', 'permission'])
     reason = StringField(required=True)
     reporting_to = StringField(required=True)
-    approval_sts = StringField(required=True)
+    approval_sts = StringField(choices = ['approved', 'declined', 'pending'])
     from_date = StringField(required=True)
     to_date = StringField(required=True)
+    from_time = StringField()
+    to_time = StringField()
+    title = StringField()
+    reject_description = StringField()
+    user_id = StringField()
 
 
 class Project(Document):
