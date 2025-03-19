@@ -25,30 +25,15 @@ class Assign_projects:
     def insert_assign_project(self):
 
         data = request.get_json()  
-
-        project_id = data.get('project_id')
-        project = Project.objects(id=project_id).first()
-      
-        if not project:
-            return create_response(False,"Project Id not found",None,"Incorrect project id",400)
-        
-        user_id = data.get('user_id')
         client_data = g.payload
      
-        user = Employee.objects(id=user_id).first()
-        if not user:
-            return create_response(False,"User not found",None,"Incorrect user id",400)
+        for project_data in data:
+            project_data['assigned_by'] = client_data['user_id']
+            project_data['assigned_by_role'] = client_data['role']
+            assign_project = Assign_project(**project_data)
+            assign_project.save() 
        
-        data['assigned_by'] = client_data['user_id']
-        data['assigned_by_role'] = client_data['role']
-        data['project_name'] = project['project_name']
-        data['user_name'] = user['first_name']
-        
-        assign_project = Assign_project(**data)
-        assign_project.save()
-
         return create_response(True,"Project assigned successfully",str(assign_project.id),None,201)
-
     
     @roles_accepted('Admin', 'HR','Manager')
     def update_assign_project(self):

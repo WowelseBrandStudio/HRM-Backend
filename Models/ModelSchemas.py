@@ -37,7 +37,6 @@ class organization(Document):
     api_secret = StringField(required=True)
     app_id = StringField(required=True)
 
-
 class permission_request(Document):
     objects = QuerySetManager()
     leave_type = StringField(required=True, default = 'cl', choices = ['cl', 'sick', 'permission'])
@@ -52,7 +51,6 @@ class permission_request(Document):
     reject_description = StringField()
     user_id = StringField()
 
-
 class Project(Document):
     objects = QuerySetManager()
     project_name = StringField(required=True)
@@ -62,7 +60,6 @@ class Project(Document):
     created_by = StringField(required=True)
     created_by_role = StringField(required=True)
     modified_at = DateTimeField()
-
     
 class Assign_project(Document):
     objects = QuerySetManager()
