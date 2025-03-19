@@ -42,7 +42,7 @@ class Employees:
         user = Employee(**data)
         user.save()
         
-        html_template = render_template('registration_template.html',email=data.get('email'),password=data.get('password'),login_url='https://wowelse.com/')
+        html_template = render_template('registration_template.html',email=data.get('email'),password=data.get('password'),login_url='http://localhost:4200/auth/sign-in/User')
         send_mail(data.get('email'),"Registration successfull",html_template,'hrm25085@gmail.com')
         
         return create_response(True,"Employee created successfully",str(user.id),None,201)

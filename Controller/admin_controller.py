@@ -6,11 +6,9 @@ from Utils.helper import create_response, roles_accepted, serialize_user
 from mongoengine import connect, disconnect
 
 
-
 class Admins:
     def __init__(self):
-        db_name = g.payload['app_id']
-       
+        db_name = g.payload['app_id']      
         
         disconnect('default')
         self.connect_to_db(db_name)
@@ -22,7 +20,6 @@ class Admins:
             host = HOST,
             db = db_name,
         )
-
 
     @roles_accepted('Admin')    
     def insert_admin(self):
@@ -41,8 +38,7 @@ class Admins:
             data['user_id'] = 'WOW-ADM-1001'
        
         admin = Admin(**data)
-        admin.save()
-   
+        admin.save()   
        
         return create_response(True,"Admin created successfully",str(admin.id),None,201)
 
