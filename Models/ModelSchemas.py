@@ -67,7 +67,7 @@ class Assign_project(Document):
     project_name = StringField(required=True)
     user_id = StringField(required=True)
     user_name = StringField(required=True)
-    responsible = StringField(required=True)    
+    responsible = StringField()    
     assigned_at = DateTimeField(default=datetime.datetime.now)
     assigned_by = StringField(required=True)   
     assigned_by_role = StringField(required=True)   
