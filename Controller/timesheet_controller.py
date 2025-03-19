@@ -28,9 +28,11 @@ class Timesheets:
 
         project_id = data.get('project_id')
         project = Project.objects(id=project_id).first()
-
+        if not project:
+            return create_response(False,"Project not found",None,None,404)
+       
         client_data = g.payload
-        
+   
         if client_data['role'] == 'HR':
             collection_name = Human_resource
         elif client_data['role'] == 'User':
