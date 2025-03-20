@@ -4,7 +4,7 @@ from flask import g, jsonify, render_template, request
 from Controller.email_controller import send_mail
 from Models.ModelSchemas import HOST, Manager
 from Utils.helper import create_response, roles_accepted, serialize_user
-from mongoengine import connect, disconnect
+from mongoengine import connect, disconnect,DoesNotExist
 
 
 class Managers:
@@ -59,7 +59,7 @@ class Managers:
 
         manager = Manager.objects(id=id).first()
         if not manager:
-            return create_response(True,"Manager not found ",None,None,404)
+            raise DoesNotExist(f'Manager {id} not found') 
 
     
         data.pop('id')  

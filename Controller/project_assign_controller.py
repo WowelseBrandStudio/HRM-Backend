@@ -3,7 +3,7 @@ import datetime
 from flask import g, jsonify, request
 from Models.ModelSchemas import HOST, Human_resource, Manager, Project, Assign_project,Employee
 from Utils.helper import create_response, roles_accepted, serialize_user
-from mongoengine import connect, disconnect
+from mongoengine import connect, disconnect,DoesNotExist
 
 
 class Assign_projects:
@@ -25,30 +25,20 @@ class Assign_projects:
     def insert_assign_project(self):
 
         data = request.get_json()  
-
-        project_id = data.get('project_id')
-        project = Project.objects(id=project_id).first()
-      
-        if not project:
-            return create_response(False,"Project Id not found",None,"Incorrect project id",400)
-        
-        user_id = data.get('user_id')
         client_data = g.payload
      
-        user = Employee.objects(id=user_id).first()
-        if not user:
-            return create_response(False,"User not found",None,"Incorrect user id",400)
+        for project_data in data:
+            project_data['assigned_by'] = client_data['user_id']
+            project_data['assigned_by_role'] = client_data['role']
+
+            already_exist_query = Assign_project.objects(user_id=project_data.get('user_id'),project_id=data.get('project_id'))
+            if already_exist_query:
+                return create_response(False,"User already assigned",None,None,400)
+            
+            assign_project = Assign_project(**project_data)
+            assign_project.save() 
        
-        data['assigned_by'] = client_data['user_id']
-        data['assigned_by_role'] = client_data['role']
-        data['project_name'] = project['project_name']
-        data['user_name'] = user['first_name']
-        
-        assign_project = Assign_project(**data)
-        assign_project.save()
-
         return create_response(True,"Project assigned successfully",str(assign_project.id),None,201)
-
     
     @roles_accepted('Admin', 'HR','Manager')
     def update_assign_project(self):
@@ -75,8 +65,7 @@ class Assign_projects:
         assign_project = Assign_project.objects(id=id).first()
         
         if not assign_project:
-            return create_response(True,"Project assign not found",None,None,404)
-
+            raise DoesNotExist(f'Assign Project {id} not found') 
     
         data.pop('id')  
         assign_project.update(**data)
@@ -92,7 +81,7 @@ class Assign_projects:
         client_data=g.payload
     
         if client_data['role'] != 'Admin':
-            user_id =client_data['user_id']
+            user_id =client_data['user_id']            
         else:            
             user_id =  data.get('user_id') 
                 
@@ -117,4 +106,3 @@ class Assign_projects:
 
         else:
             return create_response(True,"Assign project not found",None,None,404)
-

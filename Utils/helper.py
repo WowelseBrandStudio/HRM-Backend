@@ -1,5 +1,6 @@
 import datetime
 from functools import wraps
+from time import sleep
 from flask import g, jsonify, request
 from flask_mail import Message
 import jwt
@@ -12,12 +13,14 @@ def serialize_user(user):
     user_dict["_id"] = str(user_dict["_id"])  # Convert ObjectId to string
     return user_dict
 
-def connect_to_db(db_name):
+def connect_to_db(db_name,alias='default'):
         # Dynamically switch the database based on app_id
-        connect(
-            host = HOST,
-            db = db_name,
-        )
+        # connect(
+        #     host = HOST,
+        #     db = db_name,
+        # )
+    disconnect(alias)  # Disconnect previous connection
+    return connect(db=db_name, host=HOST, alias=alias)
 
 def set_organisation(f):
     @wraps(f)
@@ -32,7 +35,7 @@ def set_organisation(f):
         api_secret = request.headers.get('x-api-secret')
         
         disconnect('default')
-        connect_to_db('organisation_handler')
+        connect_to_db('organisation_handler','default')
         org = organization.objects(api_key=api_key, api_secret=api_secret).first()
         
         if not org:

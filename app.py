@@ -158,7 +158,6 @@ def assign_project():
     }
     return methods.get(request.method)()
 
-
 @app.route('/timesheet', methods=['GET', 'POST', 'DELETE', 'PUT'])
 @validate_token
 def timesheet():

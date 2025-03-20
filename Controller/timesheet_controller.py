@@ -3,23 +3,25 @@ import datetime
 from flask import g, jsonify, request
 from Models.ModelSchemas import HOST, Admin, Human_resource, Manager, Project,Timesheet, Employee
 from Utils.helper import create_response, roles_accepted, serialize_user
-from mongoengine import connect, disconnect
+from mongoengine import connect, disconnect,DoesNotExist
 
 
 class Timesheets:
     def __init__(self):
         db_name = g.payload['app_id']
         
-        disconnect('default')
+        # disconnect('default')
         self.connect_to_db(db_name)
       
 
-    def connect_to_db(self, db_name):
+    def connect_to_db(self, db_name,alias='default'):
         # Dynamically switch the database based on app_id
-        connect(
-            host = HOST,
-            db = db_name,
-        )
+        # connect(
+        #     host = HOST,
+        #     db = db_name,
+        # )
+        disconnect(alias)  # Disconnect previous connection
+        return connect(db=db_name, host=HOST, alias=alias)
 
     @roles_accepted('HR', 'User','Manager')
     def insert_timesheet(self):
@@ -28,9 +30,11 @@ class Timesheets:
 
         project_id = data.get('project_id')
         project = Project.objects(id=project_id).first()
-
+        if not project:
+            raise DoesNotExist('Project not found') 
+       
         client_data = g.payload
-        
+   
         if client_data['role'] == 'HR':
             collection_name = Human_resource
         elif client_data['role'] == 'User':
@@ -39,6 +43,8 @@ class Timesheets:
             collection_name = Manager
     
         user = collection_name.objects(id=client_data['user_id']).first()
+        if not user:
+            raise DoesNotExist('User not found') 
 
         data['user_id'] = client_data['user_id']
         data['user_name'] = user['first_name']
@@ -58,19 +64,12 @@ class Timesheets:
 
         id = data.get("id")
 
-        if data.get('project_id') != None:
-
-            project_id = data.get('project_id')
-            project = Project.objects(id=project_id).first()
-            data['project_name'] = project['project_name']
-
         data['modified_at'] = datetime.datetime.now
     
         timesheet = Timesheet.objects(id=id).first()
         
         if not timesheet:
-            return create_response(True,"Timesheet not found",None,None,404)
-
+            raise DoesNotExist(f'Timesheet {id} not found') 
     
         data.pop('id')  
         timesheet.update(**data)
