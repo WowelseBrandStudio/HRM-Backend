@@ -35,7 +35,7 @@ class Human_resources:
             unique_id =hr['user_id']
             sliced_unique_id = unique_id.split('-')[-1]
             new_number = int(sliced_unique_id)+1
-            new_unique_id = f'{'WOW-HR-'}{new_number}'
+            new_unique_id = f"{'WOW-HR-'}{new_number}"
             data['user_id'] = new_unique_id
         else:
             data['user_id'] = 'WOW-HR-1001'

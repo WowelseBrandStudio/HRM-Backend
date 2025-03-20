@@ -31,7 +31,7 @@ class Admins:
             unique_id =admin['user_id']            
             sliced_unique_id = unique_id.split('-')[-1]
             new_number = int(sliced_unique_id)+1
-            new_unique_id = f'{'WOW-ADM-'}{new_number}'
+            new_unique_id = f"{'WOW-ADM-'}{new_number}"
             data['user_id'] = new_unique_id
 
         else:
