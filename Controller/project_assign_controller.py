@@ -30,6 +30,11 @@ class Assign_projects:
         for project_data in data:
             project_data['assigned_by'] = client_data['user_id']
             project_data['assigned_by_role'] = client_data['role']
+
+            already_exist_query = Assign_project.objects(user_id=project_data.get('user_id'),project_id=data.get('project_id'))
+            if already_exist_query:
+                return create_response(False,"User already assigned",None,None,400)
+            
             assign_project = Assign_project(**project_data)
             assign_project.save() 
        
@@ -77,7 +82,7 @@ class Assign_projects:
         client_data=g.payload
     
         if client_data['role'] != 'Admin':
-            user_id =client_data['user_id']
+            user_id =client_data['user_id']            
         else:            
             user_id =  data.get('user_id') 
                 
@@ -102,4 +107,3 @@ class Assign_projects:
 
         else:
             return create_response(True,"Assign project not found",None,None,404)
-

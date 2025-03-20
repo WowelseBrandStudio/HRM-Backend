@@ -41,6 +41,8 @@ class Timesheets:
             collection_name = Manager
     
         user = collection_name.objects(id=client_data['user_id']).first()
+        if not user:
+            return create_response(False,"user not found",None,None,404)
 
         data['user_id'] = client_data['user_id']
         data['user_name'] = user['first_name']
