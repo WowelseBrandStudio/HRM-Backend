@@ -2,7 +2,7 @@
 from flask import g, jsonify, request
 from Models.ModelSchemas import HOST, Employee, permission_request
 from Utils.helper import create_response, roles_accepted, serialize_user
-from mongoengine import connect, disconnect
+from mongoengine import connect, disconnect,DoesNotExist
 
 class Permission:
     def __init__(self):
@@ -69,6 +69,8 @@ class Permission:
         data = request.get_json()
         permission_id = data.get("_id")
         res_obj = permission_request.objects(id=permission_id).first()
+        if not res_obj:
+            raise DoesNotExist(f'Request {id} not found') 
         data.pop('_id', None)   # _id cant update
         res_obj.update(**data)
         return create_response(True,"Permission request updated",str(res_obj.id),None,200)

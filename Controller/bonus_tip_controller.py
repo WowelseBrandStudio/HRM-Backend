@@ -3,7 +3,7 @@ import datetime
 from flask import g, jsonify, request
 from Models.ModelSchemas import HOST, Bonus
 from Utils.helper import create_response, roles_accepted, serialize_user
-from mongoengine import connect, disconnect
+from mongoengine import connect, disconnect,DoesNotExist
 
 
 class Bonus_tip:
@@ -38,7 +38,7 @@ class Bonus_tip:
 
         bonus = Bonus.objects(id=id).first()
         if not bonus:
-            return create_response(True,"Bonus not found",None,None,404)
+            raise DoesNotExist(f'Bonus {id} not found') 
 
     
         data.pop('id')  

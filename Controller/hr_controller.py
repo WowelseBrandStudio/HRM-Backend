@@ -4,7 +4,7 @@ from flask import g,render_template, request
 from Controller.email_controller import send_mail
 from Models.ModelSchemas import HOST, Human_resource
 from Utils.helper import create_response, roles_accepted, serialize_user
-from mongoengine import connect, disconnect
+from mongoengine import connect, disconnect,DoesNotExist
 
 class Human_resources:
     def __init__(self):
@@ -62,7 +62,7 @@ class Human_resources:
         hr = Human_resource.objects(id=id).first()
        
         if not hr:
-            return create_response(True,"Hr not found",None,None,404)
+            raise DoesNotExist(f'HR {id} not found') 
 
         data.pop('id')          
         hr.update(**data)

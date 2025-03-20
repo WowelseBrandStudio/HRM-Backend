@@ -3,7 +3,7 @@ import datetime
 from flask import g, jsonify, request
 from Models.ModelSchemas import HOST, Admin
 from Utils.helper import create_response, roles_accepted, serialize_user
-from mongoengine import connect, disconnect
+from mongoengine import connect, disconnect,DoesNotExist
 
 
 class Admins:
@@ -51,7 +51,7 @@ class Admins:
         id =client_data['user_id']
         admin = Admin.objects(id=id).first()
         if not admin:
-            return create_response(False,"Admin not found",None,None,200)
+            raise DoesNotExist(f'Admin {id} not found') 
             
         admin.update(**data)
         

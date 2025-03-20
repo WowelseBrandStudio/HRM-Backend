@@ -4,7 +4,7 @@ from flask import g, jsonify, render_template, request
 from Controller.email_controller import send_mail
 from Models.ModelSchemas import HOST, Employee
 from Utils.helper import create_response, roles_accepted, serialize_user
-from mongoengine import connect, disconnect
+from mongoengine import connect, disconnect,DoesNotExist
 
 
 class Employees:
@@ -58,7 +58,7 @@ class Employees:
 
         user = Employee.objects(id=id).first()
         if not user:
-            return create_response(True,"Employee not found",None,None,404)
+            raise DoesNotExist(f'Employee {id} not found') 
 
         data.pop('id')  
         user.update(**data)

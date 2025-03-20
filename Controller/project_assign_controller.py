@@ -3,7 +3,7 @@ import datetime
 from flask import g, jsonify, request
 from Models.ModelSchemas import HOST, Human_resource, Manager, Project, Assign_project,Employee
 from Utils.helper import create_response, roles_accepted, serialize_user
-from mongoengine import connect, disconnect
+from mongoengine import connect, disconnect,DoesNotExist
 
 
 class Assign_projects:
@@ -65,8 +65,7 @@ class Assign_projects:
         assign_project = Assign_project.objects(id=id).first()
         
         if not assign_project:
-            return create_response(True,"Project assign not found",None,None,404)
-
+            raise DoesNotExist(f'Assign Project {id} not found') 
     
         data.pop('id')  
         assign_project.update(**data)
