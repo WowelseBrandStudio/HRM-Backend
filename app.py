@@ -262,5 +262,6 @@ def dashboard_count():
     return methods.get(request.method)()
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(host='0.0.0.0', debug=True,use_reloader=True, port=5000)
+    # app.run(debug=True)
 
