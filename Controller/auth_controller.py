@@ -6,11 +6,12 @@ from mongoengine import connect, disconnect
 
 
 class Authentication:
-    def __init__(self,app_id):
-        self.app_id = app_id
-        # disconnect('organisation_handler')
-        disconnect('default')
-        self.connect_to_db(self.app_id)
+    def __init__(self,app_id=None):
+        pass
+        # self.app_id = app_id
+        # # disconnect('organisation_handler')
+        # disconnect('default')
+        # self.connect_to_db(self.app_id)
 
     def connect_to_db(self, db_name):
         # Dynamically switch the database based on app_id
@@ -54,7 +55,7 @@ class Authentication:
             "role": role,
             "username": username,
             "user_id":str(user['id']),
-            "app_id":self.app_id
+            # "app_id":self.app_id
         }
        
         token = JWTHandler().generate_jwt(payload)
