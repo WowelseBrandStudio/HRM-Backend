@@ -171,7 +171,7 @@ class Manager(Document):
 class Admin(Document):
     objects = QuerySetManager()
     password = StringField(required=True)
-    name =StringField(required=True)
+    first_name =StringField(required=True)
     email = EmailField(required=True,unique=True)
     mobile = StringField(required=True,unique=True)
     user_id = StringField(required=True)

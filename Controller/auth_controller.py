@@ -59,5 +59,6 @@ class Authentication:
         }
        
         token = JWTHandler().generate_jwt(payload)
-        return create_response(True,"login success",token,None,200)
+        login_info = {'token':token,'role':role}
+        return create_response(True,"login success",login_info,None,200)
 

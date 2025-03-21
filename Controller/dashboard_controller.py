@@ -34,7 +34,7 @@ class UserInfo:
             else:
                 collection_name = Human_resource
 
-            user = collection_name.objects(id=user_id)
+            user = collection_name.objects.exclude('password')(id=user_id)
         
             res_data = [serialize_user(record) for record in user]
             return create_response(True,"Data retrevied successfully",res_data,None,200)
