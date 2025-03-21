@@ -43,7 +43,7 @@ class Human_resources:
         hr = Human_resource(**data)
         hr.save()
 
-        html_template = render_template('registration_template.html',email=data.get('email'),password=data.get('password'),login_url='http://localhost:4200/auth/sign-in/HR')
+        html_template = render_template('registration_template.html',email=data.get('email'),password=data.get('password'),login_url='http://hrm-wowelse.s3-website-us-east-1.amazonaws.com/auth/sign-in/HR')
         send_mail(data.get('email'),"Registration successfull",html_template,'hrm25085@gmail.com')
         
         return create_response(True,"Hr created successfully",str(hr.id),None,201)
