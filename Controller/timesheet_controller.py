@@ -8,10 +8,11 @@ from mongoengine import connect, disconnect,DoesNotExist
 
 class Timesheets:
     def __init__(self):
-        db_name = g.payload['app_id']
+        pass
+        # db_name = g.payload['app_id']
         
-        # disconnect('default')
-        self.connect_to_db(db_name)
+        # # disconnect('default')
+        # self.connect_to_db(db_name)
       
 
     def connect_to_db(self, db_name,alias='default'):
@@ -48,6 +49,8 @@ class Timesheets:
 
         data['user_id'] = client_data['user_id']
         data['user_name'] = user['first_name']
+        data['responsible_hr'] = user['responsible_hr']
+        data['responsible_manager'] = user['responsible_manager']
         data['project_name'] = project['project_name']
       
         
@@ -78,19 +81,18 @@ class Timesheets:
     
     # @roles_accepted('Admin', 'HR', 'User','Manager')
     def get_all_timesheet(self):
-        client_data = g.payload
-        data = request.args.to_dict()      
+        client_data = g.payload  
+        filter = request.args.to_dict()      
         
-        if client_data['role'] == 'User':
-            user_id =client_data['user_id']
-        else:            
-            user_id =  data.get('user_id') 
-                
-        user_filter={
-            'user_id':user_id
-        } if user_id else {}
-        
-        timesheet = Timesheet.objects(**user_filter)
+        roles = {
+            'Manager': lambda: filter.update({"responsible_manager": client_data['user_id']}),
+            'HR': lambda: filter.update({"responsible_hr": client_data['user_id']}),
+            'User': lambda: filter.update({"user_id": client_data['user_id']})
+            
+        }
+       
+        roles.get(client_data['role'], lambda: None)()
+        timesheet = Timesheet.objects(**filter)
 
         res_data = [serialize_user(record) for record in timesheet]
         return create_response(True,"Timesheet retrevied successfully",res_data,None,200)

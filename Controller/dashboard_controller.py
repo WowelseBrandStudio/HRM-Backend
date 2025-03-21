@@ -8,10 +8,11 @@ from mongoengine import connect, disconnect
 
 class UserInfo:
     def __init__(self):
-        db_name = g.payload['app_id']      
+        pass
+        # db_name = g.payload['app_id']      
         
-        disconnect('default')
-        self.connect_to_db(db_name)      
+        # disconnect('default')
+        # self.connect_to_db(db_name)      
 
     def connect_to_db(self, db_name):
         # Dynamically switch the database based on app_id

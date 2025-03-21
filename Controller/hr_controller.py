@@ -8,9 +8,10 @@ from mongoengine import connect, disconnect,DoesNotExist
 
 class Human_resources:
     def __init__(self):
-        db_name = g.payload['app_id']
-        disconnect('default')
-        self.connect_to_db(db_name)      
+        pass
+        # db_name = g.payload['app_id']
+        # disconnect('default')
+        # self.connect_to_db(db_name)      
 
     def connect_to_db(self, db_name):
         # Dynamically switch the database based on app_id
