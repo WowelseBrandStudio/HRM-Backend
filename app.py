@@ -126,9 +126,9 @@ def permission():
 
 
 @app.route('/login', methods=['POST'])
-@set_organisation
+# @set_organisation
 def login():
-    obj = Authentication(g.app_id)
+    obj = Authentication()
     role = request.args.get("role")
     return obj.authenticate_user(role)
 
